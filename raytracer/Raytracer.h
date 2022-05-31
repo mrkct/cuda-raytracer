@@ -8,9 +8,7 @@ class Raytracer {
 public:
     Raytracer(int image_width, int image_height) {}
 
-    TracedScene trace_scene(Scene const&) {
-        return {};
-    }
+    TracedScene trace_scene(Scene const&);
 };
 
 #endif

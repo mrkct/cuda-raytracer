@@ -3,6 +3,8 @@
 #include "raytracer/Raytracer.h"
 #include <iostream>
 #include <chrono>
+#include <string>
+#include <string.h>
 
 
 struct Args {
@@ -10,7 +12,40 @@ struct Args {
     int image_width, image_height;
 
     static Args parse(int argc, char **argv) {
-        return Args {.output_path = "ciao", .image_width = 640, .image_height = 480};
+        #define OPT_WITH_ARG(short, long) \
+            ((strcmp(argv[i], short) == 0 || strcmp(argv[i], long) == 0) && i + 1 < argc)
+        
+        auto const& parse_positive_integer_or_exit = [](char const* arg, char const* argname) {
+            try {
+                int x = std::stoi(arg);
+                if (x <= 0) throw std::invalid_argument("");
+                
+                return x;
+            } catch(std::invalid_argument) {
+                std::cerr 
+                    << "Invalid value for argument " << argname << ". "
+                    << "I expected a positive integer, got '" << arg << "' instead." << std::endl;
+                std::exit(-2);
+            }
+        };
+
+        Args args = {
+            .output_path = "output.png",
+            .image_width = 640,
+            .image_height = 480
+        };
+
+        for (int i = 1; i < argc; i++) {
+            if (OPT_WITH_ARG("-o", "--output")) {
+                args.output_path = argv[++i];
+            } else if (OPT_WITH_ARG("-w", "--width")) {
+                args.image_width = parse_positive_integer_or_exit(argv[++i], "--width");
+            } else if (OPT_WITH_ARG("-h", "--height")) {
+                args.image_height = parse_positive_integer_or_exit(argv[++i], "--height");
+            }
+        }
+
+        return args;
     }
 };
 

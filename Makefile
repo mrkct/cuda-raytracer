@@ -1,10 +1,11 @@
 NAME = rt
 NVCC = nvcc
-NVCCFLAGS = -arch=sm_37 --compiler-options -Wall --compiler-options -Wextra 
+NVCCFLAGS = -arch=sm_37 -I. --compiler-options -Wall --compiler-options -Wextra 
 
 OBJS = \
-	main.o \
 	stb_image_write_impl.o \
+	main.o \
+	raytracer/Raytracer.o \
 
 .PHONY = all clean
 
