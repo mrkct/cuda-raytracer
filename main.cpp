@@ -5,6 +5,7 @@
 #include <chrono>
 #include <string>
 #include <string.h>
+#include <stb_image_write.h>
 
 
 struct Args {
@@ -21,7 +22,7 @@ struct Args {
                 if (x <= 0) throw std::invalid_argument("");
                 
                 return x;
-            } catch(std::invalid_argument) {
+            } catch(std::invalid_argument&) {
                 std::cerr 
                     << "Invalid value for argument " << argname << ". "
                     << "I expected a positive integer, got '" << arg << "' instead." << std::endl;
@@ -73,8 +74,8 @@ int main(int argc, char **argv)
         args.output_path, 
         traced_scene.width(), 
         traced_scene.height(),
-        4,
+        TracedScene::bytes_per_pixel(),
         traced_scene.pixel_data(),
-        traced_scene.width() * 4
+        traced_scene.width() * TracedScene::bytes_per_pixel()
     );
 }
