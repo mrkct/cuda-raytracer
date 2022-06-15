@@ -1,29 +1,30 @@
-#include "stb_image_write.h"
-#include "raytracer/Scene.h"
 #include "raytracer/Raytracer.h"
-#include <iostream>
+#include "raytracer/Scene.h"
+#include "stb_image_write.h"
 #include <chrono>
-#include <string>
-#include <string.h>
+#include <iostream>
 #include <stb_image_write.h>
-
+#include <string.h>
+#include <string>
 
 struct Args {
-    char const *output_path;
+    char const* output_path;
     int image_width, image_height;
 
-    static Args parse(int argc, char **argv) {
-        #define OPT_WITH_ARG(short, long) \
-            ((strcmp(argv[i], short) == 0 || strcmp(argv[i], long) == 0) && i + 1 < argc)
-        
+    static Args parse(int argc, char** argv)
+    {
+#define OPT_WITH_ARG(short, long) \
+    ((strcmp(argv[i], short) == 0 || strcmp(argv[i], long) == 0) && i + 1 < argc)
+
         auto const& parse_positive_integer_or_exit = [](char const* arg, char const* argname) {
             try {
                 int x = std::stoi(arg);
-                if (x <= 0) throw std::invalid_argument("");
-                
+                if (x <= 0)
+                    throw std::invalid_argument("");
+
                 return x;
-            } catch(std::invalid_argument&) {
-                std::cerr 
+            } catch (std::invalid_argument&) {
+                std::cerr
                     << "Invalid value for argument " << argname << ". "
                     << "I expected a positive integer, got '" << arg << "' instead." << std::endl;
                 std::exit(-2);
@@ -50,20 +51,21 @@ struct Args {
     }
 };
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     auto args = Args::parse(argc, argv);
 
     std::cout << "Starting render with" << std::endl
-        << "\tSize: " << args.image_width << "x" << args.image_height << std::endl
-        << "\tOutput: " << args.output_path << std::endl;
+              << "\tSize: " << args.image_width << "x" << args.image_height << std::endl
+              << "\tOutput: " << args.output_path << std::endl;
 
     Scene scene;
     // TODO: Prepare the scene
 
     auto raytracer = Raytracer(args.image_width, args.image_height);
-    
-    auto start_time = std::chrono::high_resolution_clock::now();;    
+
+    auto start_time = std::chrono::high_resolution_clock::now();
+    ;
     auto traced_scene = raytracer.trace_scene(scene);
     auto finish_time = std::chrono::high_resolution_clock::now();
     auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(finish_time - start_time);
@@ -71,11 +73,10 @@ int main(int argc, char **argv)
     std::cout << "Elapsed time: " << elapsed_time.count() << "ns" << std::endl;
 
     return stbi_write_png(
-        args.output_path, 
-        traced_scene.width(), 
+        args.output_path,
+        traced_scene.width(),
         traced_scene.height(),
-        TracedScene::bytes_per_pixel(),
+        4, // 4 bytes per pixel, RGBA
         traced_scene.pixel_data(),
-        traced_scene.width() * TracedScene::bytes_per_pixel()
-    );
+        traced_scene.width() * 4);
 }

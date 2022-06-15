@@ -16,11 +16,12 @@ public:
     int width() const { return m_width; }
     int height() const { return m_height; }
     static int bytes_per_pixel() { return 4; }
-    uint32_t const* pixel_data() const { return m_data.get(); }
+    uint32_t const* pixel_data() const { return m_data; }
 
 private:
     unsigned int m_width, m_height;
-    std::unique_ptr<uint32_t[]> m_data;
+    uint32_t* m_data;
+    // std::unique_ptr<uint32_t[]> m_data;
 };
 
 #endif

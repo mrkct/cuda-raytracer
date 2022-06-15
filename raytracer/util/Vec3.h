@@ -58,7 +58,7 @@ public:
 
     __device__ uint32_t make_rgba() const
     {
-        return static_cast<uint8_t>(e[0]) << 24 | static_cast<uint8_t>(e[1]) << 16 | static_cast<uint8_t>(e[2]) << 8 | 255;
+        return static_cast<uint8_t>(255) << 24 | static_cast<uint8_t>(255.99f * e[2]) << 16 | static_cast<uint8_t>(255.99f * e[1]) << 8 | static_cast<uint8_t>(255.99f * e[0]);
     }
 
 public:
