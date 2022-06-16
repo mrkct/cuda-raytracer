@@ -6,6 +6,7 @@ OBJS = \
 	stb_image_write_impl.o \
 	main.o \
 	raytracer/Raytracer.o \
+	raytracer/geometry/Sphere.o \
 
 .PHONY = all clean
 

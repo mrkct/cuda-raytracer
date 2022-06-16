@@ -2,6 +2,7 @@
 #include <cuda_runtime.h>
 #include <iostream>
 #include <raytracer/Raytracer.h>
+#include <raytracer/geometry/Sphere.h>
 #include <raytracer/util/Ray.h>
 #include <raytracer/util/Vec3.h>
 #include <stdio.h>
@@ -24,14 +25,13 @@ __device__ double hit_sphere(Point3 const& center, double radius, Ray const& r)
 
 __device__ Color color(Ray const& ray)
 {
-    auto sphere_origin = Point3(0.0, 0.0, -1.0);
-    auto t = hit_sphere(sphere_origin, 0.5, ray);
-    if (t > 0.0) {
-        Vec3 N = unit_vector(ray.at(t) - sphere_origin);
-        return 0.5 * Color(N.x() + 1, N.y() + 1, N.z() + 1);
+    auto sphere = Sphere({ 0, 0, -1 }, 0.5);
+    HitRecord r;
+    if (sphere.hit(ray, 0, 100000000.0, r) && false) {
+        return 0.5 * Color(r.normal.x() + 1, r.normal.y() + 1, r.normal.z() + 1);
     } else {
         Vec3 unit_direction = unit_vector(ray.direction());
-        t = 0.5 * (unit_direction.y() + 1.0);
+        auto t = 0.5 * (unit_direction.y() + 1.0);
         return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
     }
 }
