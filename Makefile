@@ -1,6 +1,6 @@
 NAME = rt
 NVCC = nvcc
-NVCCFLAGS = -arch=sm_37 -I. --compiler-options -Wall --compiler-options -Wextra 
+NVCCFLAGS = -arch=sm_37 -I. --compiler-options -Wall --compiler-options -Wextra -Wno-deprecated-gpu-targets
 
 OBJS = \
 	stb_image_write_impl.o \
@@ -8,6 +8,8 @@ OBJS = \
 	raytracer/util/CudaHelpers.o \
 	raytracer/Raytracer.o \
 	raytracer/geometry/Sphere.o \
+	raytracer/Scenes.o \
+	raytracer/HittableList.o \
 
 .PHONY = all clean
 

@@ -2,42 +2,33 @@
 #include <cuda_runtime.h>
 #include <iostream>
 #include <raytracer/Raytracer.h>
+#include <raytracer/Scenes.h>
 #include <raytracer/geometry/Sphere.h>
-#include <raytracer/util/CudaHelper.h>
+#include <raytracer/util/CudaHelpers.h>
+#include <raytracer/util/DeviceArray.h>
 #include <raytracer/util/Ray.h>
 #include <raytracer/util/Vec3.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-__device__ double hit_sphere(Point3 const& center, double radius, Ray const& r)
+__device__ Color ray_color(Ray const& ray, HittableList const& objects)
 {
-    Vec3 oc = r.origin() - center;
-    auto a = r.direction().length_squared();
-    auto half_b = dot(oc, r.direction());
-    auto c = oc.length_squared() - radius * radius;
-    auto discriminant = half_b * half_b - a * c;
-
-    if (discriminant < 0)
-        return -1.0;
-    else
-        return (-half_b - sqrt(discriminant)) / a;
-}
-
-__device__ Color color(Ray const& ray)
-{
-    auto sphere = Sphere({ 0, 0, -1 }, 0.5);
     HitRecord r;
-    if (sphere.hit(ray, 0, 100000000.0, r)) {
+
+    if (objects.hit(ray, 0, INFINITY, r)) {
         return 0.5 * Color(r.normal.x() + 1, r.normal.y() + 1, r.normal.z() + 1);
-    } else {
-        Vec3 unit_direction = unit_vector(ray.direction());
-        auto t = 0.5 * (unit_direction.y() + 1.0);
-        return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
     }
+
+    Vec3 unit_direction = unit_vector(ray.direction());
+    auto t = 0.5 * (unit_direction.y() + 1.0);
+    return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
 }
 
-__global__ void calculateRay(uint32_t* framebuffer, int image_width, int image_height)
+__global__ void calculate_ray(
+    uint32_t* framebuffer,
+    HittableList& scene,
+    int image_width, int image_height)
 {
     int col = blockIdx.x * blockDim.x + threadIdx.x;
     int row = blockIdx.y * blockDim.y + threadIdx.y;
@@ -62,20 +53,38 @@ __global__ void calculateRay(uint32_t* framebuffer, int image_width, int image_h
     auto v = double(row) / (image_height - 1);
     Ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
 
-    *pixel = color(r).make_rgba();
+    *pixel = ray_color(r, scene).make_rgba();
 }
 
-TracedScene Raytracer::trace_scene(Scene const&)
+__global__ void create_scene(HittableList* list)
+{
+    new (list) HittableList;
+    create_single_sphere_scene(*list);
+}
+
+TracedScene Raytracer::trace_scene()
 {
     // FIXME: With 32 it starts failing due to 'too many resources requested'
     constexpr int blockSize = 8;
 
     uint32_t* framebuffer;
     checkCudaErrors(cudaMallocManaged(&framebuffer, m_image.width * m_image.height * 4));
+    checkCudaErrors(cudaGetLastError());
+
+    HittableList* device_scene;
+    checkCudaErrors(cudaMalloc(&device_scene, sizeof(*device_scene)));
+    checkCudaErrors(cudaGetLastError());
+
+    create_scene<<<1, 1>>>(device_scene);
+    cudaDeviceSynchronize();
+    checkCudaErrors(cudaGetLastError());
 
     dim3 grid { (m_image.width + blockSize - 1) / blockSize, (m_image.height + blockSize - 1) / blockSize };
     dim3 blocks { blockSize, blockSize };
-    calculateRay<<<grid, blocks>>>(framebuffer, m_image.width, m_image.height);
+    calculate_ray<<<grid, blocks>>>(
+        framebuffer,
+        *device_scene,
+        m_image.width, m_image.height);
     checkCudaErrors(cudaGetLastError());
 
     cudaDeviceSynchronize();

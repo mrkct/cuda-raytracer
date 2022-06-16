@@ -1,7 +1,6 @@
 #ifndef RAYTRACER_H
 #define RAYTRACER_H
 
-#include <raytracer/Scene.h>
 #include <raytracer/TracedScene.h>
 
 class Raytracer {
@@ -11,7 +10,7 @@ public:
     {
     }
 
-    TracedScene trace_scene(Scene const&);
+    TracedScene trace_scene();
 
 private:
     struct {

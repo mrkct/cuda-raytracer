@@ -1,7 +1,7 @@
 #include <chrono>
 #include <iostream>
 #include <raytracer/Raytracer.h>
-#include <raytracer/Scene.h>
+#include <raytracer/geometry/Sphere.h>
 #include <stb_image_write.h>
 #include <string.h>
 #include <string>
@@ -58,18 +58,14 @@ int main(int argc, char** argv)
               << "\tSize: " << args.image_width << "x" << args.image_height << std::endl
               << "\tOutput: " << args.output_path << std::endl;
 
-    Scene scene;
-    // TODO: Prepare the scene
-
     auto raytracer = Raytracer(args.image_width, args.image_height);
 
     auto start_time = std::chrono::high_resolution_clock::now();
-    ;
-    auto traced_scene = raytracer.trace_scene(scene);
+    auto traced_scene = raytracer.trace_scene();
     auto finish_time = std::chrono::high_resolution_clock::now();
-    auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(finish_time - start_time);
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time);
 
-    std::cout << "Elapsed time: " << elapsed_time.count() << "ns" << std::endl;
+    std::cout << "Elapsed time: " << elapsed_time.count() << "ms" << std::endl;
 
     return stbi_write_png(
         args.output_path,
