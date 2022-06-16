@@ -1,8 +1,7 @@
-#include "raytracer/Raytracer.h"
-#include "raytracer/Scene.h"
-#include "stb_image_write.h"
 #include <chrono>
 #include <iostream>
+#include <raytracer/Raytracer.h>
+#include <raytracer/Scene.h>
 #include <stb_image_write.h>
 #include <string.h>
 #include <string>
