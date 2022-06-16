@@ -1,10 +1,10 @@
 #include <raytracer/geometry/Sphere.h>
 
-__device__ bool Sphere::hit(Ray const& r, double t_min, double t_max, HitRecord& rec) const
+__device__ bool Sphere::hit(Ray const& ray, double t_min, double t_max, HitRecord& rec) const
 {
-    Vec3 oc = r.origin() - m_center;
-    auto a = r.direction().length_squared();
-    auto half_b = dot(oc, r.direction());
+    Vec3 oc = ray.origin() - m_center;
+    auto a = ray.direction().length_squared();
+    auto half_b = dot(oc, ray.direction());
     auto c = oc.length_squared() - m_radius * m_radius;
 
     auto discriminant = half_b * half_b - a * c;
@@ -21,8 +21,9 @@ __device__ bool Sphere::hit(Ray const& r, double t_min, double t_max, HitRecord&
     }
 
     rec.t = root;
-    rec.p = r.at(rec.t);
-    rec.normal = (rec.p - m_center) / m_radius;
+    rec.p = ray.at(rec.t);
+    auto outward_normal = (rec.p - m_center) / m_radius;
+    rec.set_face_normal(ray, outward_normal);
 
     return true;
 }
