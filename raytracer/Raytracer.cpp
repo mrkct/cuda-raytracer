@@ -3,6 +3,7 @@
 #include <iostream>
 #include <raytracer/Raytracer.h>
 #include <raytracer/geometry/Sphere.h>
+#include <raytracer/util/CudaHelper.h>
 #include <raytracer/util/Ray.h>
 #include <raytracer/util/Vec3.h>
 #include <stdio.h>
@@ -66,15 +67,19 @@ __global__ void calculateRay(uint32_t* framebuffer, int image_width, int image_h
 
 TracedScene Raytracer::trace_scene(Scene const&)
 {
-    constexpr int blockSize = 32;
+    // FIXME: With 32 it starts failing due to 'too many resources requested'
+    constexpr int blockSize = 8;
 
     uint32_t* framebuffer;
-    cudaMallocManaged(&framebuffer, m_image.width * m_image.height * 4);
+    checkCudaErrors(cudaMallocManaged(&framebuffer, m_image.width * m_image.height * 4));
 
     dim3 grid { (m_image.width + blockSize - 1) / blockSize, (m_image.height + blockSize - 1) / blockSize };
     dim3 blocks { blockSize, blockSize };
     calculateRay<<<grid, blocks>>>(framebuffer, m_image.width, m_image.height);
+    checkCudaErrors(cudaGetLastError());
+
     cudaDeviceSynchronize();
+    checkCudaErrors(cudaGetLastError());
 
     return TracedScene { m_image.width, m_image.height, framebuffer };
 }
