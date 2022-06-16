@@ -8,14 +8,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-__device__ bool hit_sphere(Point3 const& center, double radius, Ray const& r)
+__device__ double hit_sphere(Point3 const& center, double radius, Ray const& r)
 {
     Vec3 oc = r.origin() - center;
     auto a = dot(r.direction(), r.direction());
     auto b = 2.0 * dot(oc, r.direction());
     auto c = dot(oc, oc) - radius * radius;
     auto discriminant = b * b - 4 * a * c;
-    return (discriminant > 0);
+
+    if (discriminant < 0)
+        return -1.0;
+    else
+        return (-b - sqrt(discriminant)) / (2.0 * a);
 }
 
 __global__ void calculateRay(uint32_t* framebuffer, int image_width, int image_height)
@@ -43,11 +47,14 @@ __global__ void calculateRay(uint32_t* framebuffer, int image_width, int image_h
     auto v = double(row) / (image_height - 1);
     Ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
 
-    if (hit_sphere(Point3(0.0, 0.0, -1.0), 0.5, r)) {
-        *pixel = Color(1.0, 0.0, 0.0).make_rgba();
+    auto sphere_origin = Point3(0.0, 0.0, -1.0);
+    auto t = hit_sphere(sphere_origin, 0.5, r);
+    if (t > 0.0) {
+        Vec3 N = unit_vector(r.at(t) - sphere_origin);
+        *pixel = (0.5 * Color(N.x() + 1, N.y() + 1, N.z() + 1)).make_rgba();
     } else {
         Vec3 unit_direction = unit_vector(r.direction());
-        auto t = 0.5 * (unit_direction.y() + 1.0);
+        t = 0.5 * (unit_direction.y() + 1.0);
         *pixel = ((1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0)).make_rgba();
     }
 }
