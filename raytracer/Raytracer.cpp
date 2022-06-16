@@ -28,7 +28,7 @@ __device__ Color color(Ray const& ray)
 {
     auto sphere = Sphere({ 0, 0, -1 }, 0.5);
     HitRecord r;
-    if (sphere.hit(ray, 0, 100000000.0, r) && false) {
+    if (sphere.hit(ray, 0, 100000000.0, r)) {
         return 0.5 * Color(r.normal.x() + 1, r.normal.y() + 1, r.normal.z() + 1);
     } else {
         Vec3 unit_direction = unit_vector(ray.direction());
