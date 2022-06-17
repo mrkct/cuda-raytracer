@@ -2,6 +2,7 @@
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
 #include <iostream>
+#include <raytracer/Camera.h>
 #include <raytracer/Raytracer.h>
 #include <raytracer/Scenes.h>
 #include <raytracer/geometry/Sphere.h>
@@ -13,6 +14,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+static constexpr int samples_per_pixel = 100;
 
 __device__ Color ray_color(Ray const& ray, HittableList const& objects)
 {
@@ -39,24 +42,20 @@ __global__ void calculate_ray(
     if (row >= image_height || col >= image_width)
         return;
 
-    uint32_t* pixel = &framebuffer[(image_height - row - 1) * image_width + col];
+    size_t id = (image_height - row - 1) * image_width + col;
+    uint32_t* pixel = &framebuffer[id];
+    Camera camera { image_width, image_height };
 
-    auto const aspect_ratio = (float)image_width / image_height;
-    auto viewport_height = 2.0;
-    auto viewport_width = aspect_ratio * viewport_height;
-    auto focal_length = 1.0;
+    Color pixel_color(0, 0, 0);
+    for (int s = 0; s < samples_per_pixel; ++s) {
+        auto u = (col + rng.next(id)) / (image_width - 1);
+        auto v = (row + rng.next(id)) / (image_height - 1);
+        Ray r = camera.get_ray(u, v);
+        pixel_color += ray_color(r, scene);
+    }
 
-    // FIXME: The origin should go into constant memory
-    auto origin = Point3(0, 0, 0);
-    auto horizontal = Vec3(viewport_width, 0, 0);
-    auto vertical = Vec3(0, viewport_height, 0);
-    auto lower_left_corner = origin - horizontal / 2 - vertical / 2 - Vec3(0, 0, focal_length);
-
-    auto u = double(col) / (image_width - 1);
-    auto v = double(row) / (image_height - 1);
-    Ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
-
-    *pixel = ray_color(r, scene).make_rgba();
+    pixel_color = pixel_color / samples_per_pixel;
+    *pixel = pixel_color.make_rgba();
 }
 
 __global__ void create_scene(HittableList* list)
