@@ -1,11 +1,13 @@
 #include <cstdint>
 #include <cuda_runtime.h>
+#include <curand_kernel.h>
 #include <iostream>
 #include <raytracer/Raytracer.h>
 #include <raytracer/Scenes.h>
 #include <raytracer/geometry/Sphere.h>
 #include <raytracer/util/CudaHelpers.h>
 #include <raytracer/util/DeviceArray.h>
+#include <raytracer/util/DeviceRNG.h>
 #include <raytracer/util/Ray.h>
 #include <raytracer/util/Vec3.h>
 #include <stdio.h>
@@ -27,6 +29,7 @@ __device__ Color ray_color(Ray const& ray, HittableList const& objects)
 
 __global__ void calculate_ray(
     uint32_t* framebuffer,
+    DeviceRNG& rng,
     HittableList& scene,
     int image_width, int image_height)
 {
@@ -81,8 +84,12 @@ TracedScene Raytracer::trace_scene()
 
     dim3 grid { (m_image.width + blockSize - 1) / blockSize, (m_image.height + blockSize - 1) / blockSize };
     dim3 blocks { blockSize, blockSize };
+
+    auto& device_rng = *DeviceRNG::init(grid, blocks, m_image.width, m_image.height);
+
     calculate_ray<<<grid, blocks>>>(
         framebuffer,
+        device_rng,
         *device_scene,
         m_image.width, m_image.height);
     checkCudaErrors(cudaGetLastError());

@@ -10,6 +10,7 @@ OBJS = \
 	raytracer/geometry/Sphere.o \
 	raytracer/Scenes.o \
 	raytracer/HittableList.o \
+	raytracer/util/DeviceRNG.o \
 
 .PHONY = all clean
 
