@@ -17,7 +17,7 @@ __device__ Color ray_color(Ray const& ray, HittableList const& objects)
     HitRecord r;
 
     if (objects.hit(ray, 0, INFINITY, r)) {
-        return 0.5 * Color(r.normal.x() + 1, r.normal.y() + 1, r.normal.z() + 1);
+        return 0.5 * (r.normal + Color(1, 1, 1));
     }
 
     Vec3 unit_direction = unit_vector(ray.direction());
