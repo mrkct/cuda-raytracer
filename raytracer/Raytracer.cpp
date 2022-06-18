@@ -25,7 +25,7 @@ __device__ Color ray_color(size_t id, Ray const& ray, DeviceRNG& rng, HittableLi
     float attenuation = 1.0f;
     static constexpr int max_depth = 50;
     for (int i = 0; i < max_depth; i++) {
-        if (objects.hit(r, 0, INFINITY, rec)) {
+        if (objects.hit(r, 0.01f, INFINITY, rec)) {
             Point3 target = rec.p + rec.normal + rng.next_in_unit_sphere(id);
             r = Ray(rec.p, target - rec.p);
             attenuation *= 0.5;
@@ -64,6 +64,7 @@ __global__ void calculate_ray(
     }
 
     pixel_color = pixel_color / samples_per_pixel;
+    pixel_color = pixel_color.gamma2_correct();
     *pixel = pixel_color.make_rgba();
 }
 

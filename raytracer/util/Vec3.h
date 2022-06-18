@@ -61,6 +61,11 @@ public:
         return static_cast<uint8_t>(255) << 24 | static_cast<uint8_t>(255.99f * e[2]) << 16 | static_cast<uint8_t>(255.99f * e[1]) << 8 | static_cast<uint8_t>(255.99f * e[0]);
     }
 
+    __device__ Vec3 gamma2_correct()
+    {
+        return { sqrtf(e[0]), sqrtf(e[1]), sqrtf(e[2]) };
+    }
+
 public:
     double e[3];
 };
