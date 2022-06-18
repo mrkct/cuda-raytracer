@@ -2,11 +2,14 @@
 
 #include <raytracer/geometry/Hittable.h>
 #include <raytracer/material/Material.h>
+#include <raytracer/util/DeviceRNG.h>
 
 class Metal : public Material {
 public:
-    __device__ Metal(Color albedo)
-        : m_albedo(albedo)
+    __device__ Metal(DeviceRNG& rng, Color albedo, float fuzz)
+        : m_rng(rng)
+        , m_albedo(albedo)
+        , m_fuzz(fuzz)
     {
     }
 
@@ -20,5 +23,7 @@ public:
 private:
     static __device__ Vec3 reflect_vector(Vec3, Vec3);
 
+    DeviceRNG& m_rng;
     Color m_albedo;
+    float m_fuzz;
 };
