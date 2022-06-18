@@ -1,6 +1,7 @@
 #pragma once
 
 #include <curand_kernel.h>
+#include <raytracer/util/Vec3.h>
 
 class DeviceRNG {
 public:
@@ -8,6 +9,7 @@ public:
 
     __device__ float next(size_t id);
     __device__ float next(size_t id, float min, float max);
+    __device__ Vec3 next_in_unit_sphere(size_t id);
 
     __device__ DeviceRNG(curandState*);
 
