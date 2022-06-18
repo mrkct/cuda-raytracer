@@ -23,7 +23,7 @@ __device__ bool Dielectric::scatter(
     bool cannot_refract = refraction_ratio * sin_theta > 1.0;
     Vec3 direction;
 
-    if (cannot_refract)
+    if (cannot_refract || reflectance(cos_theta, refraction_ratio) > m_rng.next(id))
         direction = reflect_vector(unit_direction, rec.normal);
     else
         direction = refract_vector(unit_direction, rec.normal, refraction_ratio);
@@ -31,4 +31,12 @@ __device__ bool Dielectric::scatter(
     scattered = Ray(rec.p, direction);
 
     return true;
+}
+
+__device__ float Dielectric::reflectance(float cosine, float ref_idx)
+{
+    // Use Schlick's approximation for reflectance.
+    auto r0 = (1 - ref_idx) / (1 + ref_idx);
+    r0 = r0 * r0;
+    return r0 + (1 - r0) * pow((1 - cosine), 5);
 }
