@@ -135,3 +135,10 @@ __device__ inline Vec3 unit_vector(Vec3 v)
 {
     return v / v.length();
 }
+
+__device__ inline Vec3 reflect_vector(Vec3 vec, Vec3 normal)
+{
+    // dot(vec, normal) = scale to multiply the normal because 'vec' is not 'unit length'
+    // but 'normal' is and we want the reflected vector to be the same length as the original one
+    return vec - 2 * dot(vec, normal) * normal;
+}

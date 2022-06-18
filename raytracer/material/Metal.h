@@ -21,8 +21,6 @@ public:
         Ray& scattered) const override;
 
 private:
-    static __device__ Vec3 reflect_vector(Vec3, Vec3);
-
     DeviceRNG& m_rng;
     Color m_albedo;
     float m_fuzz;
