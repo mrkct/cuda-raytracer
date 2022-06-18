@@ -1,20 +1,21 @@
 #include <raytracer/HittableList.h>
 #include <raytracer/Scenes.h>
 #include <raytracer/geometry/Sphere.h>
+#include <raytracer/material/Dielectric.h>
 #include <raytracer/material/Lambertian.h>
 #include <raytracer/material/Metal.h>
 
 __device__ void create_single_sphere_scene(DeviceRNG& rng, HittableList& objects)
 {
-    auto* red_lambertian = new Lambertian(rng, Color(1.0, 0.0, 0.0));
-    auto* green_lambertian = new Lambertian(rng, Color(0.0, 1.0, 0.0));
-    auto* white_fuzzy_metal = new Metal(rng, Color { 0.8, 0.8, 0.8 }, 0.7);
-    auto* blue_clear_metal = new Metal(rng, Color { 0.2, 0.2, 1.0 }, 0.1);
+    auto* material_ground = new Lambertian(rng, Color(0.8, 0.8, 0.0));
+    auto* material_center = new Lambertian(rng, Color(0.1, 0.2, 0.5));
+    auto* material_left = new Dielectric(1.5);
+    auto* material_right = new Metal(rng, Color(0.8, 0.6, 0.2), 0.0);
 
     objects.reserve(4);
-    objects.append(new Sphere({ 0, 0, -1 }, 0.5, *red_lambertian));
-    objects.append(new Sphere({ 1, 0, -1 }, 0.5, *white_fuzzy_metal));
-    objects.append(new Sphere({ -1, 0, -1 }, 0.5, *blue_clear_metal));
+    objects.append(new Sphere({ 0, 0, -1 }, 0.5, *material_center));
+    objects.append(new Sphere({ 1, 0, -1 }, 0.5, *material_right));
+    objects.append(new Sphere({ -1, 0, -1 }, 0.5, *material_left));
 
-    objects.append(new Sphere({ 0, -100.5, -1 }, 100, *green_lambertian));
+    objects.append(new Sphere({ 0, -100.5, -1 }, 100, *material_ground));
 }
