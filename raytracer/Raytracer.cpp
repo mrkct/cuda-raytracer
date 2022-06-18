@@ -17,24 +17,33 @@
 
 static constexpr int samples_per_pixel = 100;
 
-__device__ Color ray_color(Ray const& ray, HittableList const& objects)
+__device__ Color ray_color(size_t id, Ray const& ray, DeviceRNG& rng, HittableList const& objects)
 {
-    HitRecord r;
+    HitRecord rec;
 
-    if (objects.hit(ray, 0, INFINITY, r)) {
-        return 0.5 * (r.normal + Color(1, 1, 1));
+    Ray r = ray;
+    float attenuation = 1.0f;
+    static constexpr int max_depth = 50;
+    for (int i = 0; i < max_depth; i++) {
+        if (objects.hit(r, 0, INFINITY, rec)) {
+            Point3 target = rec.p + rec.normal + rng.next_in_unit_sphere(id);
+            r = Ray(rec.p, target - rec.p);
+            attenuation *= 0.5;
+        } else {
+            Vec3 unit_direction = unit_vector(ray.direction());
+            auto t = 0.5 * (unit_direction.y() + 1.0);
+            return attenuation * ((1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0));
+        }
     }
 
-    Vec3 unit_direction = unit_vector(ray.direction());
-    auto t = 0.5 * (unit_direction.y() + 1.0);
-    return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
+    return { 0, 0, 0 };
 }
 
 __global__ void calculate_ray(
     uint32_t* framebuffer,
     DeviceRNG& rng,
     HittableList& scene,
-    int image_width, int image_height)
+    size_t image_width, size_t image_height)
 {
     int col = blockIdx.x * blockDim.x + threadIdx.x;
     int row = blockIdx.y * blockDim.y + threadIdx.y;
@@ -51,7 +60,7 @@ __global__ void calculate_ray(
         auto u = (col + rng.next(id)) / (image_width - 1);
         auto v = (row + rng.next(id)) / (image_height - 1);
         Ray r = camera.get_ray(u, v);
-        pixel_color += ray_color(r, scene);
+        pixel_color += ray_color(id, r, rng, scene);
     }
 
     pixel_color = pixel_color / samples_per_pixel;
