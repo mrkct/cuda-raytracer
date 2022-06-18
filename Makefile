@@ -11,6 +11,7 @@ OBJS = \
 	raytracer/Scenes.o \
 	raytracer/HittableList.o \
 	raytracer/util/DeviceRNG.o \
+	raytracer/material/Lambertian.o \
 
 .PHONY = all clean
 

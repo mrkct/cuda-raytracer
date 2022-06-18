@@ -22,13 +22,17 @@ __device__ Color ray_color(size_t id, Ray const& ray, DeviceRNG& rng, HittableLi
     HitRecord rec;
 
     Ray r = ray;
-    float attenuation = 1.0f;
+    Color attenuation { 1.0, 1.0, 1.0 };
     static constexpr int max_depth = 50;
     for (int i = 0; i < max_depth; i++) {
         if (objects.hit(r, 0.01f, INFINITY, rec)) {
-            Point3 target = rec.p + rec.normal + rng.next_in_unit_sphere(id);
-            r = Ray(rec.p, target - rec.p);
-            attenuation *= 0.5;
+            Color att;
+            Ray scattered_ray;
+            if (!rec.material->scatter(id, r, rec, att, scattered_ray)) {
+                return { 0.0, 0.0, 0.0 };
+            }
+            attenuation = attenuation * att;
+            r = scattered_ray;
         } else {
             Vec3 unit_direction = unit_vector(ray.direction());
             auto t = 0.5 * (unit_direction.y() + 1.0);
@@ -68,10 +72,10 @@ __global__ void calculate_ray(
     *pixel = pixel_color.make_rgba();
 }
 
-__global__ void create_scene(HittableList* list)
+__global__ void create_scene(DeviceRNG& rng, HittableList* list)
 {
     new (list) HittableList;
-    create_single_sphere_scene(*list);
+    create_single_sphere_scene(rng, *list);
 }
 
 TracedScene Raytracer::trace_scene()
@@ -83,18 +87,18 @@ TracedScene Raytracer::trace_scene()
     checkCudaErrors(cudaMallocManaged(&framebuffer, m_image.width * m_image.height * 4));
     checkCudaErrors(cudaGetLastError());
 
-    HittableList* device_scene;
-    checkCudaErrors(cudaMalloc(&device_scene, sizeof(*device_scene)));
-    checkCudaErrors(cudaGetLastError());
-
-    create_scene<<<1, 1>>>(device_scene);
-    cudaDeviceSynchronize();
-    checkCudaErrors(cudaGetLastError());
-
     dim3 grid { (m_image.width + blockSize - 1) / blockSize, (m_image.height + blockSize - 1) / blockSize };
     dim3 blocks { blockSize, blockSize };
 
     auto& device_rng = *DeviceRNG::init(grid, blocks, m_image.width, m_image.height);
+
+    HittableList* device_scene;
+    checkCudaErrors(cudaMalloc(&device_scene, sizeof(*device_scene)));
+    checkCudaErrors(cudaGetLastError());
+
+    create_scene<<<1, 1>>>(device_rng, device_scene);
+    cudaDeviceSynchronize();
+    checkCudaErrors(cudaGetLastError());
 
     calculate_ray<<<grid, blocks>>>(
         framebuffer,

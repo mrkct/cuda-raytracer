@@ -3,10 +3,13 @@
 #include <raytracer/util/Ray.h>
 #include <raytracer/util/Vec3.h>
 
+class Material;
+
 struct HitRecord {
     Point3 p;
     Vec3 normal;
     float t;
+    Material const* material;
 
     bool front_face;
 

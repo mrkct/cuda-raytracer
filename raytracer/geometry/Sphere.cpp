@@ -22,6 +22,7 @@ __device__ bool Sphere::hit(Ray const& ray, double t_min, double t_max, HitRecor
 
     rec.t = root;
     rec.p = ray.at(rec.t);
+    rec.material = &m_material;
     auto outward_normal = (rec.p - m_center) / m_radius;
     rec.set_face_normal(ray, outward_normal);
 

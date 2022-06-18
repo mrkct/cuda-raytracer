@@ -66,6 +66,12 @@ public:
         return { sqrtf(e[0]), sqrtf(e[1]), sqrtf(e[2]) };
     }
 
+    __device__ bool is_near_zero()
+    {
+        auto const s = 1e-8;
+        return (fabs(e[0]) < s) && (fabs(e[1]) < s) && (fabs(e[2]) < s);
+    }
+
 public:
     double e[3];
 };
