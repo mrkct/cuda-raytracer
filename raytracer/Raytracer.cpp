@@ -6,6 +6,7 @@
 #include <raytracer/Raytracer.h>
 #include <raytracer/Scenes.h>
 #include <raytracer/geometry/Sphere.h>
+#include <raytracer/scenes/TestScene.h>
 #include <raytracer/util/CudaHelpers.h>
 #include <raytracer/util/DeviceArray.h>
 #include <raytracer/util/DeviceRNG.h>
@@ -17,7 +18,11 @@
 
 static constexpr int samples_per_pixel = 100;
 
-__device__ Color ray_color(size_t id, Ray const& ray, DeviceRNG& rng, HittableList const& objects)
+__device__ Color ray_color(
+    size_t id,
+    Ray const& ray,
+    DeviceRNG& rng,
+    Hittable const& world)
 {
     HitRecord rec;
 
@@ -25,7 +30,7 @@ __device__ Color ray_color(size_t id, Ray const& ray, DeviceRNG& rng, HittableLi
     Color attenuation { 1.0, 1.0, 1.0 };
     static constexpr int max_depth = 50;
     for (int i = 0; i < max_depth; i++) {
-        if (objects.hit(r, 0.01f, INFINITY, rec)) {
+        if (world.hit(r, 0.01f, INFINITY, rec)) {
             Color att;
             Ray scattered_ray;
             if (!rec.material->scatter(id, r, rec, att, scattered_ray)) {
@@ -45,9 +50,9 @@ __device__ Color ray_color(size_t id, Ray const& ray, DeviceRNG& rng, HittableLi
 
 __global__ void calculate_ray(
     uint32_t* framebuffer,
+    size_t image_width, size_t image_height,
     DeviceRNG& rng,
-    HittableList& scene,
-    size_t image_width, size_t image_height)
+    Hittable const& world)
 {
     int col = blockIdx.x * blockDim.x + threadIdx.x;
     int row = blockIdx.y * blockDim.y + threadIdx.y;
@@ -67,18 +72,12 @@ __global__ void calculate_ray(
         auto u = (col + rng.next(id)) / (image_width - 1);
         auto v = (row + rng.next(id)) / (image_height - 1);
         Ray r = camera.get_ray(u, v);
-        pixel_color += ray_color(id, r, rng, scene);
+        pixel_color += ray_color(id, r, rng, world);
     }
 
     pixel_color = pixel_color / samples_per_pixel;
     pixel_color = pixel_color.gamma2_correct();
     *pixel = pixel_color.make_rgba();
-}
-
-__global__ void create_scene(DeviceRNG& rng, HittableList* list)
-{
-    new (list) HittableList;
-    create_single_sphere_scene(rng, *list);
 }
 
 TracedScene Raytracer::trace_scene()
@@ -93,21 +92,14 @@ TracedScene Raytracer::trace_scene()
     dim3 grid { (m_image.width + blockSize - 1) / blockSize, (m_image.height + blockSize - 1) / blockSize };
     dim3 blocks { blockSize, blockSize };
 
-    auto& device_rng = *DeviceRNG::init(grid, blocks, m_image.width, m_image.height);
-
-    HittableList* device_scene;
-    checkCudaErrors(cudaMalloc(&device_scene, sizeof(*device_scene)));
-    checkCudaErrors(cudaGetLastError());
-
-    create_scene<<<1, 1>>>(device_rng, device_scene);
-    cudaDeviceSynchronize();
-    checkCudaErrors(cudaGetLastError());
+    auto& rng = *DeviceRNG::init(grid, blocks, m_image.width, m_image.height);
+    auto& world = new_on_device<TestScene>(rng);
 
     calculate_ray<<<grid, blocks>>>(
         framebuffer,
-        device_rng,
-        *device_scene,
-        m_image.width, m_image.height);
+        m_image.width, m_image.height,
+        rng,
+        world);
     checkCudaErrors(cudaGetLastError());
 
     cudaDeviceSynchronize();
