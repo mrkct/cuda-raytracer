@@ -5,6 +5,12 @@
 
 class Camera {
 public:
+    static Camera& create_on_device(
+        Point3 const& look_from,
+        Point3 const& look_at,
+        double vertical_fov,
+        size_t image_width, size_t image_height);
+
     __device__ Camera(
         Point3 look_from,
         Point3 look_at,

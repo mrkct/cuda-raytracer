@@ -50,6 +50,7 @@ __global__ void calculate_ray(
     size_t image_width, size_t image_height,
     int samples_per_pixel,
     DeviceRNG& rng,
+    Camera& camera,
     Hittable const& world)
 {
     int col = blockIdx.x * blockDim.x + threadIdx.x;
@@ -60,10 +61,6 @@ __global__ void calculate_ray(
 
     size_t id = (image_height - row - 1) * image_width + col;
     uint32_t* pixel = &framebuffer[id];
-    Camera camera {
-        { -2, 2, 1 }, { 0, 0, -1 }, { 0, 1, 0 }, 90,
-        image_width, image_height
-    };
 
     Color pixel_color(0, 0, 0);
     for (int s = 0; s < samples_per_pixel; ++s) {
@@ -78,7 +75,7 @@ __global__ void calculate_ray(
     *pixel = pixel_color.make_rgba();
 }
 
-TracedScene Raytracer::trace_scene(Hittable& (*scene_init)(DeviceRNG&))
+TracedScene Raytracer::trace_scene(Point3 camera_pos, Point3 look_at, Hittable& (*scene_init)(DeviceRNG&))
 {
     // FIXME: With 32 it starts failing due to 'too many resources requested'
     constexpr int blockSize = 8;
@@ -92,12 +89,14 @@ TracedScene Raytracer::trace_scene(Hittable& (*scene_init)(DeviceRNG&))
 
     auto& rng = *DeviceRNG::init(grid, blocks, m_image.width, m_image.height);
     auto& world = scene_init(rng);
+    auto& camera = Camera::create_on_device(camera_pos, look_at, 90, m_image.width, m_image.height);
 
     calculate_ray<<<grid, blocks>>>(
         framebuffer,
         m_image.width, m_image.height,
         samples_per_pixel,
         rng,
+        camera,
         world);
     checkCudaErrors(cudaGetLastError());
 

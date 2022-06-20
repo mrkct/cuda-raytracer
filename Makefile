@@ -1,6 +1,6 @@
 NAME = rt
 NVCC = nvcc
-NVCCFLAGS = -arch=sm_37 -I. --compiler-options -Wall --compiler-options -Wextra -Wno-deprecated-gpu-targets
+NVCCFLAGS = -arch=sm_37 -I. --compiler-options -Wall --compiler-options -Wextra -Wno-deprecated-gpu-targets -g
 
 OBJS = \
 	stb_image_write_impl.o \

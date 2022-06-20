@@ -1,5 +1,6 @@
 #include <chrono>
 #include <iostream>
+#include <raytracer/Camera.h>
 #include <raytracer/Raytracer.h>
 #include <raytracer/geometry/Sphere.h>
 #include <raytracer/scenes/TestScene.h>
@@ -61,7 +62,9 @@ int main(int argc, char** argv)
     auto raytracer = Raytracer(args.image_width, args.image_height);
 
     auto start_time = std::chrono::high_resolution_clock::now();
-    auto traced_scene = raytracer.trace_scene(TestScene::init);
+    auto traced_scene = raytracer.trace_scene(
+        { -2, 2, 1 }, { 0, 0, -1 },
+        TestScene::init);
     auto finish_time = std::chrono::high_resolution_clock::now();
     auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time);
 

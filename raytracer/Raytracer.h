@@ -12,7 +12,7 @@ public:
     {
     }
 
-    TracedScene trace_scene(Hittable& (*init)(DeviceRNG&));
+    TracedScene trace_scene(Point3 camera_position, Point3 look_at, Hittable& (*init)(DeviceRNG&));
 
 private:
     struct {

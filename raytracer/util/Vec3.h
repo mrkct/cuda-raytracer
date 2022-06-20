@@ -8,11 +8,11 @@ using std::sqrt;
 
 class Vec3 {
 public:
-    __device__ Vec3()
+    __host__ __device__ Vec3()
         : e { 0, 0, 0 }
     {
     }
-    __device__ Vec3(double e0, double e1, double e2)
+    __host__ __device__ Vec3(double e0, double e1, double e2)
         : e { e0, e1, e2 }
     {
     }
