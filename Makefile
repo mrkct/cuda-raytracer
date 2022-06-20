@@ -9,6 +9,7 @@ OBJS = \
 	raytracer/Raytracer.o \
 	raytracer/geometry/Sphere.o \
 	raytracer/Scenes.o \
+	raytracer/Camera.o \
 	raytracer/HittableList.o \
 	raytracer/util/DeviceRNG.o \
 	raytracer/material/Lambertian.o \
