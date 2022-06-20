@@ -4,11 +4,8 @@
 #include <iostream>
 #include <raytracer/Camera.h>
 #include <raytracer/Raytracer.h>
-#include <raytracer/Scenes.h>
-#include <raytracer/geometry/Sphere.h>
-#include <raytracer/scenes/TestScene.h>
+#include <raytracer/material/Material.h>
 #include <raytracer/util/CudaHelpers.h>
-#include <raytracer/util/DeviceArray.h>
 #include <raytracer/util/DeviceRNG.h>
 #include <raytracer/util/Ray.h>
 #include <raytracer/util/Vec3.h>
@@ -51,6 +48,7 @@ __device__ Color ray_color(
 __global__ void calculate_ray(
     uint32_t* framebuffer,
     size_t image_width, size_t image_height,
+    int samples_per_pixel,
     DeviceRNG& rng,
     Hittable const& world)
 {
@@ -80,7 +78,7 @@ __global__ void calculate_ray(
     *pixel = pixel_color.make_rgba();
 }
 
-TracedScene Raytracer::trace_scene()
+TracedScene Raytracer::trace_scene(Hittable& (*scene_init)(DeviceRNG&))
 {
     // FIXME: With 32 it starts failing due to 'too many resources requested'
     constexpr int blockSize = 8;
@@ -93,11 +91,12 @@ TracedScene Raytracer::trace_scene()
     dim3 blocks { blockSize, blockSize };
 
     auto& rng = *DeviceRNG::init(grid, blocks, m_image.width, m_image.height);
-    auto& world = new_on_device<TestScene>(rng);
+    auto& world = scene_init(rng);
 
     calculate_ray<<<grid, blocks>>>(
         framebuffer,
         m_image.width, m_image.height,
+        samples_per_pixel,
         rng,
         world);
     checkCudaErrors(cudaGetLastError());

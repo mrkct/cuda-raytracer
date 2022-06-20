@@ -6,10 +6,13 @@
 #include <raytracer/material/Dielectric.h>
 #include <raytracer/material/Lambertian.h>
 #include <raytracer/material/Metal.h>
+#include <raytracer/util/CudaHelpers.h>
 #include <raytracer/util/DeviceRNG.h>
 
 class TestScene : public Hittable {
 public:
+    static Hittable& init(DeviceRNG& rng) { return new_on_device<TestScene>(rng); }
+
     __device__ TestScene(DeviceRNG& rng)
         : m_world(*new HittableList)
     {

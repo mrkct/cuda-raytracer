@@ -2,6 +2,8 @@
 #define RAYTRACER_H
 
 #include <raytracer/TracedScene.h>
+#include <raytracer/geometry/Hittable.h>
+#include <raytracer/util/DeviceRNG.h>
 
 class Raytracer {
 public:
@@ -10,7 +12,7 @@ public:
     {
     }
 
-    TracedScene trace_scene();
+    TracedScene trace_scene(Hittable& (*init)(DeviceRNG&));
 
 private:
     struct {
