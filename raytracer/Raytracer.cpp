@@ -57,7 +57,10 @@ __global__ void calculate_ray(
 
     size_t id = (image_height - row - 1) * image_width + col;
     uint32_t* pixel = &framebuffer[id];
-    Camera camera { image_width, image_height };
+    Camera camera {
+        { -2, 2, 1 }, { 0, 0, -1 }, { 0, 1, 0 }, 90,
+        image_width, image_height
+    };
 
     Color pixel_color(0, 0, 0);
     for (int s = 0; s < samples_per_pixel; ++s) {
