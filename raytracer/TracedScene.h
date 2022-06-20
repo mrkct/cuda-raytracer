@@ -1,5 +1,4 @@
-#ifndef TRACED_SCENE_H
-#define TRACED_SCENE_H
+#pragma once
 
 #include <cstdint>
 #include <memory>
@@ -18,10 +17,9 @@ public:
     static int bytes_per_pixel() { return 4; }
     uint32_t const* pixel_data() const { return m_data; }
 
+    int write_to_file(char const* path);
+
 private:
     unsigned int m_width, m_height;
     uint32_t* m_data;
-    // std::unique_ptr<uint32_t[]> m_data;
 };
-
-#endif

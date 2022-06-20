@@ -5,6 +5,7 @@ NVCCFLAGS = -arch=sm_37 -I. --compiler-options -Wall --compiler-options -Wextra 
 OBJS = \
 	stb_image_write_impl.o \
 	main.o \
+	raytracer/TracedScene.o \
 	raytracer/util/CudaHelpers.o \
 	raytracer/Raytracer.o \
 	raytracer/geometry/Sphere.o \

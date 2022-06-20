@@ -3,7 +3,6 @@
 #include <raytracer/Raytracer.h>
 #include <raytracer/geometry/Sphere.h>
 #include <raytracer/scenes/TestScene.h>
-#include <stb_image_write.h>
 #include <string.h>
 #include <string>
 
@@ -67,12 +66,5 @@ int main(int argc, char** argv)
     auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time);
 
     std::cout << "Elapsed time: " << elapsed_time.count() << "ms" << std::endl;
-
-    return stbi_write_png(
-        args.output_path,
-        traced_scene.width(),
-        traced_scene.height(),
-        4, // 4 bytes per pixel, RGBA
-        traced_scene.pixel_data(),
-        traced_scene.width() * 4);
+    return traced_scene.write_to_file(args.output_path);
 }
