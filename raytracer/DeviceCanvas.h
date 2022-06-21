@@ -2,20 +2,24 @@
 
 #include <cstdint>
 #include <memory>
+#include <raytracer/util/CudaHelpers.h>
 
-class TracedScene {
+class DeviceCanvas {
 public:
-    TracedScene(unsigned int width, unsigned int height, uint32_t* data)
+    DeviceCanvas(unsigned int width, unsigned int height)
         : m_width(width)
         , m_height(height)
-        , m_data(data)
     {
+        checkCudaErrors(cudaMallocManaged(&m_data, width * height * 4));
+        checkCudaErrors(cudaGetLastError());
     }
+
+    ~DeviceCanvas() { checkCudaErrors(cudaFree(m_data)); }
 
     int width() const { return m_width; }
     int height() const { return m_height; }
     static int bytes_per_pixel() { return 4; }
-    uint32_t const* pixel_data() const { return m_data; }
+    uint32_t* pixel_data() { return m_data; }
 
     int write_to_file(char const* path);
 

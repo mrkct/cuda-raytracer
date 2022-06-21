@@ -68,13 +68,15 @@ int main(int argc, char** argv)
 
     auto raytracer = Raytracer(args.image_width, args.image_height);
     auto& scene = raytracer.prepare_scene(TestScene::init);
+    auto canvas = raytracer.create_canvas();
 
 #define DEG2RAD(d) (d * M_PI / 1.80f)
     auto render_start_time = std::chrono::high_resolution_clock::now();
     auto frame_only_time = std::chrono::milliseconds();
     for (int i = 0; i < 8; i++) {
         auto frame_start_time = std::chrono::high_resolution_clock::now();
-        auto traced_scene = raytracer.trace_scene(
+        raytracer.trace_scene(
+            canvas,
             { -2.0f + 0.5 * i, 2, -1.0 }, { 0, 0, -1 },
             scene);
         auto frame_finish_time = std::chrono::high_resolution_clock::now();
@@ -85,8 +87,7 @@ int main(int argc, char** argv)
 
         auto output_path = std::string(args.output_path) + to_string_with_zero_padding(i, 5) + ".png";
         std::cout << "Writing frame to " << output_path << std::endl;
-        auto success = traced_scene.write_to_file(output_path.c_str());
-        if (!success) {
+        if (!canvas.write_to_file(output_path.c_str())) {
             std::cerr << "Failed to write frame " << i << " to disk due to an error" << std::endl;
         }
     }

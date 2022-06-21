@@ -75,17 +75,13 @@ __global__ void calculate_ray(
     *pixel = pixel_color.make_rgba();
 }
 
-TracedScene Raytracer::trace_scene(Point3 camera_pos, Point3 look_at, Hittable& world)
+void Raytracer::trace_scene(DeviceCanvas& canvas, Point3 camera_pos, Point3 look_at, Hittable& world)
 {
-    uint32_t* framebuffer;
-    checkCudaErrors(cudaMallocManaged(&framebuffer, m_image.width * m_image.height * 4));
-    checkCudaErrors(cudaGetLastError());
-
     auto& camera = Camera::create_on_device(camera_pos, look_at, 60, m_image.width, m_image.height);
 
     calculate_ray<<<m_grid, m_blocks>>>(
-        framebuffer,
-        m_image.width, m_image.height,
+        canvas.pixel_data(),
+        canvas.width(), canvas.height(),
         samples_per_pixel,
         *m_rng,
         camera,
@@ -94,6 +90,4 @@ TracedScene Raytracer::trace_scene(Point3 camera_pos, Point3 look_at, Hittable& 
 
     cudaDeviceSynchronize();
     checkCudaErrors(cudaGetLastError());
-
-    return TracedScene { m_image.width, m_image.height, framebuffer };
 }

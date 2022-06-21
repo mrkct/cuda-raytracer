@@ -1,7 +1,7 @@
 #ifndef RAYTRACER_H
 #define RAYTRACER_H
 
-#include <raytracer/TracedScene.h>
+#include <raytracer/DeviceCanvas.h>
 #include <raytracer/geometry/Hittable.h>
 #include <raytracer/util/DeviceRNG.h>
 
@@ -18,8 +18,9 @@ public:
     }
 
     Hittable& prepare_scene(Hittable& (*init)(DeviceRNG&)) const { return init(*m_rng); }
+    DeviceCanvas create_canvas() { return DeviceCanvas(m_image.width, m_image.height); }
 
-    TracedScene trace_scene(Point3 camera_position, Point3 look_at, Hittable& world);
+    void trace_scene(DeviceCanvas&, Point3 camera_position, Point3 look_at, Hittable& world);
 
 private:
     struct {
