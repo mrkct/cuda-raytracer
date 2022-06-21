@@ -70,14 +70,14 @@ int main(int argc, char** argv)
     auto& scene = raytracer.prepare_scene(TestScene::init);
     auto canvas = raytracer.create_canvas();
 
-#define DEG2RAD(d) (d * M_PI / 1.80f)
+#define DEG2RAD(d) (d * M_PI / 180.f)
     auto render_start_time = std::chrono::high_resolution_clock::now();
     auto frame_only_time = std::chrono::milliseconds();
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 360; i++) {
         auto frame_start_time = std::chrono::high_resolution_clock::now();
         raytracer.trace_scene(
             canvas,
-            { -2.0f + 0.5 * i, 1.5, 1 }, { 0, 0, -1 },
+            { cosf(DEG2RAD(i)) * 3.0f, 1.5, sinf(DEG2RAD(i)) * 3.0f }, { 0, 0, -1 },
             scene);
         auto frame_finish_time = std::chrono::high_resolution_clock::now();
         auto frame_time = std::chrono::duration_cast<std::chrono::milliseconds>(frame_finish_time - frame_start_time);
