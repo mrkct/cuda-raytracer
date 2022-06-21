@@ -3,6 +3,7 @@
 #include <raytracer/Camera.h>
 #include <raytracer/Raytracer.h>
 #include <raytracer/geometry/Sphere.h>
+#include <raytracer/scenes/BookScene.h>
 #include <raytracer/scenes/TestScene.h>
 #include <string.h>
 #include <string>
@@ -51,6 +52,12 @@ struct Args {
     }
 };
 
+std::string to_string_with_zero_padding(int i, int pad)
+{
+    auto s = std::to_string(i);
+    return std::string(std::max(0, pad - (int)s.length()), '0') + s;
+}
+
 int main(int argc, char** argv)
 {
     auto args = Args::parse(argc, argv);
@@ -60,26 +67,27 @@ int main(int argc, char** argv)
               << "\tOutput: " << args.output_path << std::endl;
 
     auto raytracer = Raytracer(args.image_width, args.image_height);
+    auto& scene = raytracer.prepare_scene(TestScene::init);
+
 #define DEG2RAD(d) (d * M_PI / 1.80f)
     auto render_start_time = std::chrono::high_resolution_clock::now();
     auto frame_only_time = std::chrono::milliseconds();
-    for (int i = 0; i < 180; i += 30) {
+    for (int i = 0; i < 8; i++) {
         auto frame_start_time = std::chrono::high_resolution_clock::now();
         auto traced_scene = raytracer.trace_scene(
-            { 2.0 * cosf(DEG2RAD(i)), 0, -1.0 }, { 0, 0, -1 },
-            TestScene::init);
+            { -2.0f + 0.5 * i, 2, -1.0 }, { 0, 0, -1 },
+            scene);
         auto frame_finish_time = std::chrono::high_resolution_clock::now();
         auto frame_time = std::chrono::duration_cast<std::chrono::milliseconds>(frame_finish_time - frame_start_time);
 
         std::cout << "Frame " << i << "\tTime: " << frame_time.count() << "ms" << std::endl;
         frame_only_time += frame_time;
 
-        auto frame_id = i < 10 ? "0" + std::to_string(i) : std::to_string(i);
-        auto output_path = std::string(args.output_path) + frame_id + ".png";
+        auto output_path = std::string(args.output_path) + to_string_with_zero_padding(i, 5) + ".png";
         std::cout << "Writing frame to " << output_path << std::endl;
-        auto rc = traced_scene.write_to_file(output_path.c_str());
-        if (rc) {
-            std::cerr << "Failed to write frame " << i << " to disk due to error code " << rc << std::endl;
+        auto success = traced_scene.write_to_file(output_path.c_str());
+        if (!success) {
+            std::cerr << "Failed to write frame " << i << " to disk due to an error" << std::endl;
         }
     }
 

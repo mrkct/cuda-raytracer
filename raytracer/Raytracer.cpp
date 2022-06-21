@@ -75,27 +75,19 @@ __global__ void calculate_ray(
     *pixel = pixel_color.make_rgba();
 }
 
-TracedScene Raytracer::trace_scene(Point3 camera_pos, Point3 look_at, Hittable& (*scene_init)(DeviceRNG&))
+TracedScene Raytracer::trace_scene(Point3 camera_pos, Point3 look_at, Hittable& world)
 {
-    // FIXME: With 32 it starts failing due to 'too many resources requested'
-    constexpr int blockSize = 8;
-
     uint32_t* framebuffer;
     checkCudaErrors(cudaMallocManaged(&framebuffer, m_image.width * m_image.height * 4));
     checkCudaErrors(cudaGetLastError());
 
-    dim3 grid { (m_image.width + blockSize - 1) / blockSize, (m_image.height + blockSize - 1) / blockSize };
-    dim3 blocks { blockSize, blockSize };
+    auto& camera = Camera::create_on_device(camera_pos, look_at, 60, m_image.width, m_image.height);
 
-    auto& rng = *DeviceRNG::init(grid, blocks, m_image.width, m_image.height);
-    auto& world = scene_init(rng);
-    auto& camera = Camera::create_on_device(camera_pos, look_at, 90, m_image.width, m_image.height);
-
-    calculate_ray<<<grid, blocks>>>(
+    calculate_ray<<<m_grid, m_blocks>>>(
         framebuffer,
         m_image.width, m_image.height,
         samples_per_pixel,
-        rng,
+        *m_rng,
         camera,
         world);
     checkCudaErrors(cudaGetLastError());
