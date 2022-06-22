@@ -14,7 +14,7 @@ public:
     __device__ Point3 origin() const { return orig; }
     __device__ Vec3 direction() const { return dir; }
 
-    __device__ Point3 at(double t) const
+    __device__ Point3 at(float t) const
     {
         return orig + t * dir;
     }

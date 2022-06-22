@@ -22,5 +22,5 @@ struct HitRecord {
 
 class Hittable {
 public:
-    __device__ virtual bool hit(Ray const& r, double t_min, double t_max, HitRecord& rec) const = 0;
+    __device__ virtual bool hit(Ray const& r, float t_min, float t_max, HitRecord& rec) const = 0;
 };

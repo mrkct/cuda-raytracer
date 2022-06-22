@@ -18,10 +18,10 @@ public:
     {
         m_world.reserve(30);
 
-        auto& glass = *new Dielectric(rng, 1.5);
-        auto& lambertian = *new Lambertian(rng, Color(0.4, 0.2, 0.1));
-        auto& metal = *new Metal(rng, Color(0.7, 0.6, 0.5), 0.0);
-        auto& ground_material = *new Lambertian(rng, Color(0.5, 0.5, 0.5));
+        auto& glass = *new Dielectric(rng, 1.5f);
+        auto& lambertian = *new Lambertian(rng, Color(0.4f, 0.2f, 0.1f));
+        auto& metal = *new Metal(rng, Color(0.7f, 0.6f, 0.5f), 0.0f);
+        auto& ground_material = *new Lambertian(rng, Color(0.5f, 0.5f, 0.5f));
 
         static constexpr int colors = 10;
         auto** colored_lambertians = new Lambertian*[colors];
@@ -59,7 +59,7 @@ public:
         m_world.append(new Sphere({ 4, 1, 0 }, 1.0, metal));
     }
 
-    __device__ virtual bool hit(Ray const& r, double t_min, double t_max, HitRecord& rec) const override
+    __device__ virtual bool hit(Ray const& r, float t_min, float t_max, HitRecord& rec) const override
     {
         return m_world.hit(r, t_min, t_max, rec);
     }

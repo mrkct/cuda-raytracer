@@ -1,6 +1,6 @@
 #include <raytracer/geometry/Sphere.h>
 
-__device__ bool Sphere::hit(Ray const& ray, double t_min, double t_max, HitRecord& rec) const
+__device__ bool Sphere::hit(Ray const& ray, float t_min, float t_max, HitRecord& rec) const
 {
     Vec3 oc = ray.origin() - m_center;
     auto a = ray.direction().length_squared();
@@ -10,7 +10,7 @@ __device__ bool Sphere::hit(Ray const& ray, double t_min, double t_max, HitRecor
     auto discriminant = half_b * half_b - a * c;
     if (discriminant < 0)
         return false;
-    auto sqrtd = sqrt(discriminant);
+    auto sqrtd = sqrtf(discriminant);
 
     // Find the nearest root that lies in the acceptable range
     auto root = (-half_b - sqrtd) / a;

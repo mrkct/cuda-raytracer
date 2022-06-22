@@ -5,7 +5,7 @@ __device__ void HittableList::reserve(size_t count)
     m_objects.elements = new Hittable*[count];
 }
 
-__device__ bool HittableList::hit(Ray const& r, double t_min, double t_max, HitRecord& rec) const
+__device__ bool HittableList::hit(Ray const& r, float t_min, float t_max, HitRecord& rec) const
 {
     HitRecord temp_rec;
     bool hit_anything = false;

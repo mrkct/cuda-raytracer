@@ -36,7 +36,7 @@ DeviceRNG* DeviceRNG::init(dim3 grid, dim3 block, size_t image_width, size_t ima
     kinit<<<grid, block>>>(
         rng,
         rng_state,
-        5723,
+        5723, // FIXME: Change to a random seed
         image_width,
         image_height);
     checkCudaErrors(cudaGetLastError());

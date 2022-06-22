@@ -13,7 +13,7 @@ public:
 
     __device__ void append(Hittable* h) { m_objects.append(h); }
 
-    __device__ virtual bool hit(Ray const& r, double t_min, double t_max, HitRecord& rec) const override;
+    __device__ virtual bool hit(Ray const& r, float t_min, float t_max, HitRecord& rec) const override;
 
 private:
     DeviceArray<Hittable*> m_objects = { .elements = nullptr, .length = 0 };

@@ -30,7 +30,7 @@ public:
         m_world.append(new Sphere({ 0, -100.5, -1 }, 100, material_ground));
     }
 
-    __device__ virtual bool hit(Ray const& r, double t_min, double t_max, HitRecord& rec) const override
+    __device__ virtual bool hit(Ray const& r, float t_min, float t_max, HitRecord& rec) const override
     {
         return m_world.hit(r, t_min, t_max, rec);
     }

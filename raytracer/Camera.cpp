@@ -4,7 +4,7 @@
 static __global__ void create_camera(
     Camera* c,
     Point3 look_from, Point3 look_at,
-    double vertical_fov, size_t image_width, size_t image_height)
+    float vertical_fov, size_t image_width, size_t image_height)
 {
     new (c) Camera(look_at, look_from, { 0, 1, 0 }, vertical_fov, image_width, image_height);
 }
@@ -12,7 +12,7 @@ static __global__ void create_camera(
 Camera& Camera::create_on_device(
     Point3 const& look_from,
     Point3 const& look_at,
-    double vertical_fov,
+    float vertical_fov,
     size_t image_width, size_t image_height)
 {
     Camera* p;
@@ -26,7 +26,7 @@ __device__ Camera::Camera(
     Point3 look_from,
     Point3 look_at,
     Vec3 view_up,
-    double vertical_fov,
+    float vertical_fov,
     size_t image_width,
     size_t image_height)
 {

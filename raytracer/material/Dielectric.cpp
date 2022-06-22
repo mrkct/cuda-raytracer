@@ -1,10 +1,10 @@
 #include <raytracer/material/Dielectric.h>
 
-__device__ Vec3 Dielectric::refract_vector(Vec3 const& uv, Vec3 const& n, double etai_over_etat)
+__device__ Vec3 Dielectric::refract_vector(Vec3 const& uv, Vec3 const& n, float etai_over_etat)
 {
-    auto cos_theta = fmin(dot(-uv, n), 1.0);
+    auto cos_theta = fminf(dot(-uv, n), 1.0);
     Vec3 r_out_perp = etai_over_etat * (uv + cos_theta * n);
-    Vec3 r_out_parallel = -sqrt(fabs(1.0 - r_out_perp.length_squared())) * n;
+    Vec3 r_out_parallel = -sqrtf(fabsf(1.0 - r_out_perp.length_squared())) * n;
     return r_out_perp + r_out_parallel;
 }
 
@@ -17,8 +17,8 @@ __device__ bool Dielectric::scatter(
 
     Vec3 unit_direction = unit_vector(r_in.direction());
 
-    float cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
-    float sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+    float cos_theta = fminf(dot(-unit_direction, rec.normal), 1.0);
+    float sin_theta = sqrtf(1.0 - cos_theta * cos_theta);
 
     bool cannot_refract = refraction_ratio * sin_theta > 1.0;
     Vec3 direction;
@@ -38,5 +38,5 @@ __device__ float Dielectric::reflectance(float cosine, float ref_idx)
     // Use Schlick's approximation for reflectance.
     auto r0 = (1 - ref_idx) / (1 + ref_idx);
     r0 = r0 * r0;
-    return r0 + (1 - r0) * pow((1 - cosine), 5);
+    return r0 + (1 - r0) * powf((1 - cosine), 5);
 }
