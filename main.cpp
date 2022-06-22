@@ -11,6 +11,7 @@
 struct Args {
     char const* output_path;
     int image_width, image_height;
+    int frames;
 
     static Args parse(int argc, char** argv)
     {
@@ -35,7 +36,8 @@ struct Args {
         Args args = {
             .output_path = "output.png",
             .image_width = 640,
-            .image_height = 480
+            .image_height = 480,
+            .frames = 1
         };
 
         for (int i = 1; i < argc; i++) {
@@ -45,6 +47,8 @@ struct Args {
                 args.image_width = parse_positive_integer_or_exit(argv[++i], "--width");
             } else if (OPT_WITH_ARG("-h", "--height")) {
                 args.image_height = parse_positive_integer_or_exit(argv[++i], "--height");
+            } else if (OPT_WITH_ARG("-f", "--frames")) {
+                args.frames = parse_positive_integer_or_exit(argv[++i], "--frames");
             }
         }
 
@@ -73,7 +77,7 @@ int main(int argc, char** argv)
 #define DEG2RAD(d) (d * M_PI / 180.f)
     auto render_start_time = std::chrono::high_resolution_clock::now();
     auto frame_only_time = std::chrono::milliseconds();
-    for (int i = 0; i < 360; i++) {
+    for (int i = 0; i < args.frames; i++) {
         auto frame_start_time = std::chrono::high_resolution_clock::now();
         raytracer.trace_scene(
             canvas,
