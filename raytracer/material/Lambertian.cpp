@@ -9,7 +9,6 @@ __device__ bool Lambertian::scatter(
     // Catch degenerate scatter direction
     if (scatter_direction.is_near_zero())
         scatter_direction = rec.normal;
-    __syncthreads();
 
     scattered = { rec.p, scatter_direction };
     attenuation = m_albedo;

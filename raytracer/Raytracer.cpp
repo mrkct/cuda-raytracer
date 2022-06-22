@@ -68,7 +68,9 @@ __global__ void calculate_ray(
         auto v = (row + rng.next(id)) / (image_height - 1);
         Ray r = camera.get_ray(u, v);
         pixel_color += ray_color(id, r, rng, world);
+        __syncthreads();
     }
+    __syncthreads();
 
     pixel_color = pixel_color / samples_per_pixel;
     pixel_color = pixel_color.gamma2_correct();
