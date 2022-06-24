@@ -9,7 +9,7 @@ __device__ Vec3 Dielectric::refract_vector(Vec3 const& uv, Vec3 const& n, float 
 }
 
 __device__ bool Dielectric::scatter(
-    size_t id,
+    DeviceRNG& rng,
     Ray const& r_in, HitRecord const& rec, Color& attenuation, Ray& scattered) const
 {
     attenuation = Color(1.0, 1.0, 1.0);
@@ -23,7 +23,7 @@ __device__ bool Dielectric::scatter(
     bool cannot_refract = refraction_ratio * sin_theta > 1.0;
     Vec3 direction;
 
-    if (cannot_refract || reflectance(cos_theta, refraction_ratio) > m_rng.next(id))
+    if (cannot_refract || reflectance(cos_theta, refraction_ratio) > rng.next())
         direction = reflect_vector(unit_direction, rec.normal);
     else
         direction = refract_vector(unit_direction, rec.normal, refraction_ratio);

@@ -6,17 +6,15 @@
 
 class Lambertian : public Material {
 public:
-    __device__ Lambertian(DeviceRNG& rng, Color const& color)
+    __device__ Lambertian(Color const& color)
         : m_albedo(color)
-        , m_rng(rng)
     {
     }
 
     __device__ virtual bool scatter(
-        size_t id,
+        DeviceRNG&,
         Ray const& r_in, HitRecord const& rec, Color& attenuation, Ray& scattered) const override;
 
 public:
     Color m_albedo;
-    DeviceRNG& m_rng;
 };

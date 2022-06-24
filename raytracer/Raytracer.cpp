@@ -30,7 +30,7 @@ __device__ Color ray_color(
         if (world.hit(r, 0.01f, INFINITY, rec)) {
             Color att;
             Ray scattered_ray;
-            if (!rec.material->scatter(id, r, rec, att, scattered_ray)) {
+            if (!rec.material->scatter(rng, r, rec, att, scattered_ray)) {
                 return { 0.0, 0.0, 0.0 };
             }
             attenuation = attenuation * att;
@@ -49,7 +49,7 @@ __global__ void calculate_ray(
     uint32_t* framebuffer,
     size_t image_width, size_t image_height,
     int samples_per_pixel,
-    DeviceRNG& rng,
+    DeviceRNG::Builder rng_builder,
     Camera::Builder camera_builder,
     Hittable const& world)
 {
@@ -63,10 +63,12 @@ __global__ void calculate_ray(
     uint32_t* pixel = &framebuffer[id];
 
     Camera camera = camera_builder.build();
+    DeviceRNG rng = rng_builder.build(id);
+
     Color pixel_color(0, 0, 0);
     for (int s = 0; s < samples_per_pixel; ++s) {
-        auto u = (col + rng.next(id)) / (image_width - 1);
-        auto v = (row + rng.next(id)) / (image_height - 1);
+        auto u = (col + rng.next()) / (image_width - 1);
+        auto v = (row + rng.next()) / (image_height - 1);
         Ray r = camera.get_ray(u, v);
         pixel_color += ray_color(id, r, rng, world);
         __syncthreads();
@@ -84,7 +86,7 @@ void Raytracer::trace_scene(DeviceCanvas& canvas, Point3 camera_pos, Point3 look
         canvas.pixel_data(),
         canvas.width(), canvas.height(),
         samples_per_pixel,
-        *m_rng,
+        m_rng_builder,
         Camera::Builder { .look_from = camera_pos, .look_at = look_at, .vertical_fov = 60, .image_width = m_image.width, .image_height = m_image.height },
         world);
     checkCudaErrors(cudaGetLastError());

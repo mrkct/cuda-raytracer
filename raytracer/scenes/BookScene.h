@@ -8,7 +8,7 @@
 #include <raytracer/material/Metal.h>
 #include <raytracer/util/CudaHelpers.h>
 #include <raytracer/util/DeviceRNG.h>
-
+/*
 class BookScene : public Hittable {
 public:
     static Hittable& init(DeviceRNG& rng) { return new_on_device<BookScene>(rng); }
@@ -67,3 +67,4 @@ public:
 private:
     HittableList& m_world;
 };
+*/

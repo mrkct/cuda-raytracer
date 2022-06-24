@@ -11,15 +11,15 @@
 
 class TestScene : public Hittable {
 public:
-    static Hittable& init(DeviceRNG& rng) { return new_on_device<TestScene>(rng); }
+    static Hittable& init(DeviceRNG::Builder) { return new_on_device<TestScene>(); }
 
-    __device__ TestScene(DeviceRNG& rng)
+    __device__ TestScene()
         : m_world(*new HittableList)
     {
-        auto& material_ground = *new Lambertian(rng, Color(0.8, 0.8, 0.0));
-        auto& material_center = *new Lambertian(rng, Color(0.1, 0.2, 0.5));
-        auto& material_left = *new Dielectric(rng, 0.5);
-        auto& material_right = *new Metal(rng, Color(0.8, 0.6, 0.2), 0.0);
+        auto& material_ground = *new Lambertian(Color(0.8, 0.8, 0.0));
+        auto& material_center = *new Lambertian(Color(0.1, 0.2, 0.5));
+        auto& material_left = *new Dielectric(0.5);
+        auto& material_right = *new Metal(Color(0.8, 0.6, 0.2), 0.0);
 
         m_world.reserve(4);
 

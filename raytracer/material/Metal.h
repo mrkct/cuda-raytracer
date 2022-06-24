@@ -6,22 +6,20 @@
 
 class Metal : public Material {
 public:
-    __device__ Metal(DeviceRNG& rng, Color albedo, float fuzz)
-        : m_rng(rng)
-        , m_albedo(albedo)
+    __device__ Metal(Color albedo, float fuzz)
+        : m_albedo(albedo)
         , m_fuzz(fuzz)
     {
     }
 
     __device__ virtual bool scatter(
-        size_t id,
+        DeviceRNG& rng,
         Ray const& ray,
         HitRecord const& rec,
         Color& attenuation,
         Ray& scattered) const override;
 
 private:
-    DeviceRNG& m_rng;
     Color m_albedo;
     float m_fuzz;
 };
