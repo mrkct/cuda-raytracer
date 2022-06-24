@@ -1,27 +1,6 @@
 #include <raytracer/Camera.h>
 #include <raytracer/util/CudaHelpers.h>
 
-static __global__ void create_camera(
-    Camera* c,
-    Point3 look_from, Point3 look_at,
-    float vertical_fov, size_t image_width, size_t image_height)
-{
-    new (c) Camera(look_at, look_from, { 0, 1, 0 }, vertical_fov, image_width, image_height);
-}
-
-Camera& Camera::create_on_device(
-    Point3 const& look_from,
-    Point3 const& look_at,
-    float vertical_fov,
-    size_t image_width, size_t image_height)
-{
-    Camera* p;
-    checkCudaErrors(cudaMalloc(&p, sizeof(Camera)));
-    create_camera<<<1, 1>>>(p, look_at, look_from, vertical_fov, image_width, image_height);
-    cudaDeviceSynchronize();
-    return *p;
-}
-
 __device__ Camera::Camera(
     Point3 look_from,
     Point3 look_at,

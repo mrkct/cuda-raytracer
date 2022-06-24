@@ -5,11 +5,13 @@
 
 class Camera {
 public:
-    static Camera& create_on_device(
-        Point3 const& look_from,
-        Point3 const& look_at,
-        float vertical_fov,
-        size_t image_width, size_t image_height);
+    struct Builder {
+        Point3 look_from, look_at;
+        float vertical_fov;
+        size_t image_width, image_height;
+
+        __device__ Camera build() { return Camera(look_from, look_at, { 0, 1, 0 }, vertical_fov, image_width, image_height); }
+    };
 
     __device__ Camera(
         Point3 look_from,

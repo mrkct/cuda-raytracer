@@ -50,7 +50,7 @@ __global__ void calculate_ray(
     size_t image_width, size_t image_height,
     int samples_per_pixel,
     DeviceRNG& rng,
-    Camera& camera,
+    Camera::Builder camera_builder,
     Hittable const& world)
 {
     int col = blockIdx.x * blockDim.x + threadIdx.x;
@@ -62,6 +62,7 @@ __global__ void calculate_ray(
     size_t id = (image_height - row - 1) * image_width + col;
     uint32_t* pixel = &framebuffer[id];
 
+    Camera camera = camera_builder.build();
     Color pixel_color(0, 0, 0);
     for (int s = 0; s < samples_per_pixel; ++s) {
         auto u = (col + rng.next(id)) / (image_width - 1);
@@ -79,14 +80,12 @@ __global__ void calculate_ray(
 
 void Raytracer::trace_scene(DeviceCanvas& canvas, Point3 camera_pos, Point3 look_at, Hittable& world)
 {
-    auto& camera = Camera::create_on_device(camera_pos, look_at, 60, m_image.width, m_image.height);
-
     calculate_ray<<<m_grid, m_blocks>>>(
         canvas.pixel_data(),
         canvas.width(), canvas.height(),
         samples_per_pixel,
         *m_rng,
-        camera,
+        Camera::Builder { .look_from = camera_pos, .look_at = look_at, .vertical_fov = 60, .image_width = m_image.width, .image_height = m_image.height },
         world);
     checkCudaErrors(cudaGetLastError());
 
