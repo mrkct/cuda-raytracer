@@ -81,7 +81,7 @@ int main(int argc, char** argv)
         auto frame_start_time = std::chrono::high_resolution_clock::now();
         raytracer.trace_scene(
             canvas,
-            { cosf(DEG2RAD(i)) * 3.0f, 1.5, sinf(DEG2RAD(i)) * 3.0f }, { 0, 0, -1 },
+            { 0, 0, 0 }, { 0, 0, 1 },
             scene);
         auto frame_finish_time = std::chrono::high_resolution_clock::now();
         auto frame_time = std::chrono::duration_cast<std::chrono::milliseconds>(frame_finish_time - frame_start_time);

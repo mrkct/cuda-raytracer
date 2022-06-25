@@ -13,7 +13,7 @@ static __global__ void kinit(
         return;
 
     int pixel_offset = (height - row - 1) * width + col;
-    curand_init(seed, pixel_offset, 0, &state_buffer[pixel_offset]);
+    curand_init(seed + pixel_offset, 0, 0, &state_buffer[pixel_offset]);
 }
 
 DeviceRNG::Builder DeviceRNG::init(dim3 grid, dim3 block, size_t image_width, size_t image_height)
@@ -23,7 +23,7 @@ DeviceRNG::Builder DeviceRNG::init(dim3 grid, dim3 block, size_t image_width, si
 
     kinit<<<grid, block>>>(
         rng_state,
-        5723, // FIXME: Change to a random seed
+        1234, // FIXME: Change to a random seed
         image_width,
         image_height);
     checkCudaErrors(cudaGetLastError());
