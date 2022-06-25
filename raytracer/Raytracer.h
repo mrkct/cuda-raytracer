@@ -10,10 +10,11 @@ public:
     Raytracer(unsigned int image_width, unsigned int image_height)
         : m_image({ image_width, image_height })
     {
-        static constexpr int blockSize = 8;
+        static constexpr int blockWidth = 8;
+        static constexpr int blockHeight = 4;
 
-        m_grid = { (m_image.width + blockSize - 1) / blockSize, (m_image.height + blockSize - 1) / blockSize };
-        m_blocks = { blockSize, blockSize };
+        m_grid = { (m_image.width + blockWidth - 1) / blockWidth, (m_image.height + blockHeight - 1) / blockHeight };
+        m_blocks = { blockWidth, blockHeight };
         m_rng_builder = DeviceRNG::init(m_grid, m_blocks, m_image.width, m_image.height);
     }
 
