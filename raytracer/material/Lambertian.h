@@ -17,4 +17,5 @@ public:
 
 public:
     Color m_albedo;
+    int x = 1;
 };

@@ -8,11 +8,11 @@ using std::sqrt;
 
 class Vec3 {
 public:
-    __host__ __device__ Vec3()
+    constexpr __host__ __device__ Vec3()
         : e { 0, 0, 0 }
     {
     }
-    __host__ __device__ Vec3(float e0, float e1, float e2)
+    constexpr __host__ __device__ Vec3(float e0, float e1, float e2)
         : e { e0, e1, e2 }
     {
     }

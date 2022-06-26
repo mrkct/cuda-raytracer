@@ -7,7 +7,7 @@
 void check_cuda(cudaError_t result, char const* const func, char const* const file, int const line);
 
 template<typename T, typename... Args>
-__global__ void __new_on_device_kernel(T* t, Args&&... args)
+__global__ void __new_on_device_kernel(T* t, std::remove_reference<Args>... args)
 {
     // FIXME: Rimuovi questa cosa, troppo facile rompere tutto con questa funzione
     // perchè gli arguments sono passati sempre come const& e non puoi accedervi
@@ -18,7 +18,7 @@ template<typename T>
 __global__ void __delete_on_device_kernel(T* t) { delete t; }
 
 template<typename T, typename... Args>
-T& new_on_device(Args&&... args)
+T& new_on_device(std::remove_reference<Args>... args)
 {
     T* t;
     checkCudaErrors(cudaMalloc(&t, sizeof(*t)));
