@@ -49,7 +49,6 @@ __global__ void calculate_ray(
     uint32_t* framebuffer,
     size_t image_width, size_t image_height,
     int samples_per_pixel,
-    DeviceRNG::Builder rng_builder,
     Camera::Builder camera_builder,
     Hittable const& world)
 {
@@ -69,6 +68,8 @@ __global__ void calculate_ray(
         printf("ho inizializzato deviceRng\n");
 
     Camera camera = camera_builder.build();
+    if (id == 0)
+        printf("ho inizializzato la Camera\n");
 
     Color pixel_color(0, 0, 0);
     for (int s = 0; s < samples_per_pixel; ++s) {
@@ -91,7 +92,6 @@ void Raytracer::trace_scene(DeviceCanvas& canvas, Point3 camera_pos, Point3 look
         canvas.pixel_data(),
         canvas.width(), canvas.height(),
         samples_per_pixel,
-        m_rng_builder,
         Camera::Builder { .look_from = camera_pos, .look_at = look_at, .vertical_fov = 60, .image_width = m_image.width, .image_height = m_image.height },
         world);
     checkCudaErrors(cudaGetLastError());

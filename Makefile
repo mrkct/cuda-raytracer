@@ -15,6 +15,7 @@ OBJS = \
 	raytracer/material/Lambertian.o \
 	raytracer/material/Metal.o \
 	raytracer/material/Dielectric.o \
+	raytracer/scenes/TestScene.o \
 
 .PHONY = all clean
 

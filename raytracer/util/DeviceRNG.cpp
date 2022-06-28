@@ -35,6 +35,7 @@ DeviceRNG::Builder DeviceRNG::init(dim3 grid, dim3 block, size_t image_width, si
 __device__ float DeviceRNG::next()
 {
     // curand_uniform returns between the range (0.0, 1] but we
+
     // actually want the range [0.0, 1.0)
     return 1.0 - curand_uniform(m_curand_state);
 }
