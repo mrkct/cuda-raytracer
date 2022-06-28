@@ -62,8 +62,13 @@ __global__ void calculate_ray(
     size_t id = (image_height - row - 1) * image_width + col;
     uint32_t* pixel = &framebuffer[id];
 
+    __shared__ curandState_t state;
+    curand_init(5462, id, 0, &state);
+    DeviceRNG rng(&state);
+    if (id == 0)
+        printf("ho inizializzato deviceRng\n");
+
     Camera camera = camera_builder.build();
-    DeviceRNG rng = rng_builder.build(id);
 
     Color pixel_color(0, 0, 0);
     for (int s = 0; s < samples_per_pixel; ++s) {
