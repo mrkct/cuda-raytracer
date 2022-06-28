@@ -31,7 +31,6 @@ static __global__ void create_dielectric(Dielectric* d, float r)
 }
 static __global__ void create_sphere(Sphere* s, Point3 center, float radius, Material const& material)
 {
-    printf("sphere @ %p\n", s);
     new (s) Sphere(center, radius, material);
 }
 
@@ -69,17 +68,24 @@ public:
             checkCudaErrors(cudaFree(m));
         }
 
-        auto& material_ground = *reinterpret_cast<Lambertian*>(g_ground_material_storage);
-        auto& material_center = *reinterpret_cast<Lambertian*>(g_center_material_storage);
-        auto& material_left = *reinterpret_cast<Dielectric*>(g_left_material_storage);
-        auto& material_right = *reinterpret_cast<Metal*>(g_right_material_storage);
+        void* m;
+        checkCudaErrors(cudaGetSymbolAddress(&m, g_ground_material_storage));
+        auto& material_ground = *reinterpret_cast<Lambertian*>(m);
+
+        checkCudaErrors(cudaGetSymbolAddress(&m, g_center_material_storage));
+        auto& material_center = *reinterpret_cast<Lambertian*>(m);
+
+        checkCudaErrors(cudaGetSymbolAddress(&m, g_left_material_storage));
+        auto& material_left = *reinterpret_cast<Dielectric*>(m);
+
+        checkCudaErrors(cudaGetSymbolAddress(&m, g_right_material_storage));
+        auto& material_right = *reinterpret_cast<Metal*>(m);
 
         {
             Sphere* p;
             checkCudaErrors(cudaGetSymbolAddress((void**)&p, g_spheres_storage));
             Hittable* w[] = { &p[0], &p[1], &p[2], &p[3] };
             cudaMemcpyToSymbol(g_world, w, sizeof(w));
-            printf("a: %p     b: %p      c: %p       d: %p\n", w[0], w[1], w[2], w[3]);
 
             int const SPHERES_N = 4;
             Sphere* s;
@@ -107,11 +113,6 @@ public:
     TestScene()
         : m_world(*new HittableList(DeviceArray<Hittable*> { .elements = g_world, .length = 4 }))
     {
-        printf("x0 sphere @ %p\n", m_world.m_objects[0]);
-        printf("x1 sphere @ %p\n", m_world.m_objects[1]);
-        printf("x2 sphere @ %p\n", m_world.m_objects[2]);
-
-        printf("id: %d\n", m_world.m_objects[0]->id());
     }
 
     __device__ virtual bool hit(Ray const& r, float t_min, float t_max, HitRecord& rec) const override
