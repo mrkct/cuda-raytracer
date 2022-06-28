@@ -19,6 +19,8 @@ public:
         Color& attenuation,
         Ray& scattered) const override;
 
+    __device__ virtual int id() const override { return 1; }
+
 private:
     Color m_albedo;
     float m_fuzz;

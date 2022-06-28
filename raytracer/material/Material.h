@@ -14,4 +14,6 @@ public:
         HitRecord const& rec,
         Color& attenuation,
         Ray& scattered) const = 0;
+
+    __device__ virtual int id() const = 0;
 };

@@ -15,6 +15,8 @@ public:
         DeviceRNG& rng,
         Ray const& r_in, HitRecord const& rec, Color& attenuation, Ray& scattered) const override;
 
+    __device__ virtual int id() const override { return 2; }
+
 private:
     static __device__ Vec3 refract_vector(Vec3 const& uv, Vec3 const& n, float etai_over_etat);
     static __device__ float reflectance(float cosine, float ref_idx);
