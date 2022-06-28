@@ -10,7 +10,11 @@ public:
         float vertical_fov;
         size_t image_width, image_height;
 
-        __device__ Camera build() { return Camera(look_from, look_at, { 0, 1, 0 }, vertical_fov, image_width, image_height); }
+        __device__ Camera build()
+        {
+            printf("Camera::Builder.build()\n");
+            return Camera(look_from, look_at, { 0, 1, 0 }, vertical_fov, image_width, image_height);
+        }
     };
 
     __device__ Camera(
