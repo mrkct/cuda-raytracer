@@ -14,6 +14,8 @@ public:
     __device__ virtual bool hit(
         Ray const& r, float t_min, float t_max, HitRecord& rec) const override;
 
+    __device__ virtual int id() const override { return 1234; }
+
 public:
     Point3 m_center;
     float m_radius;
