@@ -1,20 +1,26 @@
 NAME = rt
 NVCC = nvcc
-NVCCFLAGS = -arch=sm_37 -I. --compiler-options -Wall --compiler-options -Wextra -Wno-deprecated-gpu-targets -g
+NVCCFLAGS = -lineinfo -arch=sm_37 -I. --compiler-options -Wall --compiler-options -Wextra -Wno-deprecated-gpu-targets
 
 OBJS = \
-	stb_image_write_impl.o \
+	camera.o \
 	main.o \
-	raytracer/DeviceCanvas.o \
-	raytracer/util/CudaHelpers.o \
-	raytracer/Raytracer.o \
-	raytracer/geometry/Sphere.o \
-	raytracer/Camera.o \
-	raytracer/HittableList.o \
-	raytracer/util/DeviceRNG.o \
-	raytracer/material/Lambertian.o \
-	raytracer/material/Metal.o \
-	raytracer/material/Dielectric.o \
+	raytracer.o \
+	geometry/sphere.o \
+	materials/dielectric.o \
+	materials/lambertian.o \
+	materials/material.o \
+	materials/metal.o \
+	scenes/scene.o \
+	scenes/single_sphere.o \
+	scenes/test_scene.o \
+	util/arg_parsing.o \
+	util/check_cuda_errors.o \
+	util/framebuffer.o \
+	util/rng.o \
+	util/stb_image_write_impl.o \
+	util/time_measurement.o \
+	util/vec3.o \
 
 .PHONY = all clean
 
@@ -25,10 +31,10 @@ test-run: all
 	./$(NAME)
 
 # Compile differently because it gives a bunch of warnings we don't care about
-stb_image_write_impl.o: stb_image_write_impl.cpp
-	$(CXX) -c -o stb_image_write_impl.o stb_image_write_impl.cpp
+util/stb_image_write_impl.o: util/stb_image_write_impl.c
+	$(CXX) -c -o util/stb_image_write_impl.o util/stb_image_write_impl.c
 
-%.o: %.cpp
+%.o: %.cu
 	$(NVCC) -x cu $(NVCCFLAGS) -dc $< -o $@
 
 clean:
