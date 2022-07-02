@@ -25,6 +25,11 @@ inline __host__ __device__ uint32_t color_to_rgba(color c)
         | (uint8_t)(255.99f * c.x));
 }
 
+inline __host__ __device__ color rgba_to_color(uint32_t rgba)
+{
+    return make_color((double)(rgba & 0xff) / 255, (double)((rgba >> 8) & 0xff) / 255, (double)((rgba >> 16) & 0xff) / 255);
+}
+
 inline __host__ __device__ color gamma2_correct_color(color c) { return make_vec3(sqrt(c.x), sqrt(c.y), sqrt(c.z)); }
 
 inline __host__ __device__ bool is_near_zero(vec3 v)

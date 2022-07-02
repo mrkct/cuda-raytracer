@@ -11,8 +11,8 @@ __device__ color texture_color_at(struct Texture* texture, double u, double v, v
         return solid_texture_color_at((struct SolidTextureData*)texture->data, u, v, point);
     case CHECKERED:
         return checkered_texture_color_at((struct CheckeredTextureData*)texture->data, u, v, point);
-    // case IMAGE:
-    //     return image_texture_color_at(texture->data, u, v, point);
+    case IMAGE:
+        return image_texture_color_at((struct ImageTextureData*)texture->data, u, v, point);
     default:
         printf("texture not implemented!!!\n");
         return make_color(0, 0, 0);
