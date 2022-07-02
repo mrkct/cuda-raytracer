@@ -26,7 +26,7 @@ int main(int argc, char const* argv[])
         args.image_width, args.image_height, args.frames, args.output_path);
 
     struct Framebuffer fb = alloc_framebuffer(args.image_width, args.image_height);
-    struct Scene scene = create_test_scene();
+    struct Scene scene = create_single_sphere_scene();
 
 #define DEG2RAD(d) (d * M_PI / 180.f)
 

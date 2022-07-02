@@ -13,7 +13,9 @@ OBJS = \
 	materials/metal.o \
 	scenes/scene.o \
 	scenes/single_sphere.o \
-	scenes/test_scene.o \
+	textures/texture.o \
+	textures/checkered_texture.o \
+	textures/solid_texture.o \
 	util/arg_parsing.o \
 	util/check_cuda_errors.o \
 	util/framebuffer.o \

@@ -10,8 +10,10 @@ struct HitRecord {
     point3 p;
     vec3 normal;
     double t;
-    Material const* material;
 
+    double u, v;
+
+    Material const* material;
     bool front_face;
 };
 

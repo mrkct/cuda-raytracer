@@ -3,9 +3,9 @@
 
 #include <stdio.h>
 
-struct LambertianData make_lambertian_material_data(color albedo)
+struct LambertianData make_lambertian_material_data(struct Texture* texture)
 {
-    return (struct LambertianData) { .albedo = albedo };
+    return (struct LambertianData) { .texture = texture };
 }
 
 struct Material make_lambertian_material(LambertianData* data)
@@ -25,7 +25,7 @@ __device__ bool lambertian_scatter(void* vdata, curandState_t* rng_state, struct
         scatter_direction = rec->normal;
 
     *out_scattered = make_ray(rec->p, scatter_direction);
-    *out_attenuation = data->albedo;
+    *out_attenuation = texture_color_at(data->texture, rec->u, rec->v, rec->p);
 
     return true;
 }

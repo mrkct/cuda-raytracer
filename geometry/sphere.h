@@ -3,6 +3,7 @@
 
 #include <geometry/hittable.h>
 #include <materials/material.h>
+#include <textures/texture.h>
 #include <util/vec3.h>
 
 struct Sphere {
