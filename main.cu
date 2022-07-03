@@ -1,5 +1,6 @@
 #include <math.h>
 #include <raytracer.h>
+#include <scenes/planets.h>
 #include <scenes/single_sphere.h>
 #include <scenes/test_scene.h>
 #include <stdio.h>
@@ -26,7 +27,7 @@ int main(int argc, char const* argv[])
         args.image_width, args.image_height, args.frames, args.output_path);
 
     struct Framebuffer fb = alloc_framebuffer(args.image_width, args.image_height);
-    struct Scene scene = create_single_sphere_scene();
+    struct Scene scene = create_planets_scene();
 
 #define DEG2RAD(d) (d * M_PI / 180.f)
 
@@ -36,7 +37,7 @@ int main(int argc, char const* argv[])
     long long total_time_start = current_time_in_milliseconds();
     for (int i = 0; i < args.frames; i++) {
         long long render_time_start = current_time_in_milliseconds();
-        raytrace_scene(fb, scene, make_vec3(0, 1, -2), make_vec3(0, 0, 1), 60);
+        raytrace_scene(fb, scene, PLANETS_CAMERA_FROM, PLANETS_CAMERA_LOOKAT, PLANETS_CAMERA_FOV);
         long long render_time = current_time_in_milliseconds() - render_time_start;
 
         printf("Frame %d took\t%lld ms\n", i, render_time);

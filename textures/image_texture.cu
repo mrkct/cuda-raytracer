@@ -8,14 +8,18 @@ struct ImageTextureData make_image_texture_data_from_file(char const* filename)
 {
     int w, h;
     unsigned char* host_image_data = stbi_load(filename, &w, &h, NULL, 4);
+    if (!host_image_data) {
+        printf("failed to load %s : %s\n", filename, stbi_failure_reason());
+        exit(-1);
+    }
     uint32_t* dev_image_data;
-
     int const image_size_in_bytes = 4 * w * h;
     checkCudaErrors(cudaMalloc(&dev_image_data, image_size_in_bytes));
     checkCudaErrors(cudaMemcpy(dev_image_data, host_image_data, image_size_in_bytes, cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaDeviceSynchronize());
+
     stbi_image_free(host_image_data);
 
-    checkCudaErrors(cudaDeviceSynchronize());
     return (struct ImageTextureData) { .data = dev_image_data, .width = (unsigned)w, .height = (unsigned)h };
 }
 
@@ -32,6 +36,6 @@ struct Texture make_image_texture(struct ImageTextureData* d)
 __device__ color image_texture_color_at(struct ImageTextureData* d, double u, double v, point3)
 {
     int x = u * (d->width - 1);
-    int y = v * (d->height - 1);
+    int y = (d->height - 1) - v * (d->height - 1);
     return rgba_to_color(d->data[y * d->width + x]);
 }

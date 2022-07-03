@@ -13,6 +13,7 @@ OBJS = \
 	materials/metal.o \
 	scenes/scene.o \
 	scenes/single_sphere.o \
+	scenes/planets.o \
 	textures/image_texture.o \
 	textures/texture.o \
 	textures/checkered_texture.o \

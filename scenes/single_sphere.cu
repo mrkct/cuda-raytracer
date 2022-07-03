@@ -22,7 +22,7 @@ struct Scene create_single_sphere_scene(void)
     cudaMallocManaged(&image_texture_data, sizeof(*image_texture_data));
 
     *texture_data = make_checkered_texture_data(0.1, make_color(0.8, 0, 0), make_color(0.9, 0.9, 0.9));
-    *image_texture_data = make_image_texture_data_from_file("earth.jpg");
+    *image_texture_data = make_image_texture_data_from_file("sample_textures/earth.png");
 
     *texture = make_image_texture(image_texture_data); // make_checkered_texture(image_texture_data);
     *material_data = make_lambertian_material_data(texture);

@@ -1,4 +1,7 @@
+#include <assert.h>
 #include <geometry/sphere.h>
+#include <math.h>
+#include <stdio.h>
 
 __device__ bool ray_sphere_hit(struct Sphere sphere, struct Ray ray, double t_min, double t_max, HitRecord* out_rec)
 {
@@ -26,8 +29,8 @@ __device__ bool ray_sphere_hit(struct Sphere sphere, struct Ray ray, double t_mi
     vec3 outward_normal = (out_rec->p - sphere.origin) / sphere.radius;
     set_face_normal(out_rec, ray, outward_normal);
 
-    double theta = acos(-out_rec->p.y);
-    double phi = atan2(-out_rec->p.z, out_rec->p.x) + M_PI;
+    double theta = acos(-outward_normal.y);
+    double phi = atan2(-outward_normal.z, outward_normal.x) + M_PI;
     out_rec->u = phi / (2 * M_PI);
     out_rec->v = theta / M_PI;
 
