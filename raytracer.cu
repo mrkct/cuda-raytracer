@@ -46,9 +46,9 @@ static __device__ void calculate_ray(
     curandState_t* rng_state,
     color* out_color)
 {
-    double u = ((double)col + rng_next(rng_state)) / (width - 1);
-    double v = ((double)row + rng_next(rng_state)) / (height - 1);
-    struct Ray ray = project_ray_from_camera_to_focal_plane(camera, u, v);
+    double const u = ((double)col + rng_next(rng_state)) / (width - 1);
+    double const v = ((double)row + rng_next(rng_state)) / (height - 1);
+    const struct Ray ray = project_ray_from_camera_to_focal_plane(camera, u, v);
 
     *out_color = *out_color + ray_color(id, rng_state, ray);
 }
@@ -58,13 +58,13 @@ static __global__ void trace_scene(
 {
     static unsigned const seed = 1234;
 
-    int col = blockIdx.x * blockDim.x + threadIdx.x;
-    int row = blockIdx.y * blockDim.y + threadIdx.y;
+    int const col = blockIdx.x * blockDim.x + threadIdx.x;
+    int const row = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (row >= fb.height || col >= fb.width)
         return;
 
-    unsigned id = (fb.height - row - 1) * fb.width + col;
+    unsigned const id = (fb.height - row - 1) * fb.width + col;
     uint32_t* pixel = &fb.data[id];
 
     curandState_t rng_state;
