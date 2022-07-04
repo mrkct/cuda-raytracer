@@ -27,7 +27,7 @@ int main(int argc, char const* argv[])
         args.image_width, args.image_height, args.frames, args.output_path);
 
     struct Framebuffer fb = alloc_framebuffer(args.image_width, args.image_height);
-    struct Scene scene = create_planets_scene();
+    struct Scene scene = create_test_scene();
 
 #define DEG2RAD(d) (d * M_PI / 180.f)
 
@@ -37,9 +37,7 @@ int main(int argc, char const* argv[])
     long long total_time_start = current_time_in_milliseconds();
     for (int i = 0; i < args.frames; i++) {
         long long render_time_start = current_time_in_milliseconds();
-        printf("render_time_start: %lld\n", render_time_start);
-        raytrace_scene(fb, scene, args.samples, PLANETS_CAMERA_FROM, PLANETS_CAMERA_LOOKAT, PLANETS_CAMERA_FOV);
-        printf("render_time_end: %lld\n", current_time_in_milliseconds());
+        raytrace_scene(fb, scene, args.samples, TEST_SCENE_CAMERA_FROM, TEST_SCENE_CAMERA_LOOK_AT, TEST_SCENE_CAMERA_FOV);
 
         long long render_time = current_time_in_milliseconds() - render_time_start;
 

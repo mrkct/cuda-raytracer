@@ -18,6 +18,7 @@ OBJS = \
 	scenes/scene.o \
 	scenes/single_sphere.o \
 	scenes/planets.o \
+	scenes/test_scene.o \
 	textures/image_texture.o \
 	textures/texture.o \
 	textures/checkered_texture.o \
