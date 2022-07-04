@@ -5,6 +5,7 @@ struct Args {
     char const* output_path;
     unsigned image_width, image_height;
     int frames;
+    int samples;
 };
 
 struct Args parse_args(int argc, char const* argv[]);

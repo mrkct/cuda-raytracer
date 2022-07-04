@@ -6,6 +6,6 @@
 #include <util/framebuffer.h>
 #include <util/vec3.h>
 
-void raytrace_scene(struct Framebuffer, struct Scene, point3 look_from, point3 look_at, double vfov);
+void raytrace_scene(struct Framebuffer, struct Scene, int samples, point3 look_from, point3 look_at, double vfov);
 
 #endif

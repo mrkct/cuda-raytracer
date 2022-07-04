@@ -6,8 +6,6 @@
 #include <util/print_utils.h>
 #include <util/rng.h>
 
-static int const samples_per_pixel = 32;
-
 __constant__ struct Camera camera;
 __constant__ struct Scene scene;
 
@@ -54,7 +52,7 @@ static __device__ void calculate_ray(
 }
 
 static __global__ void trace_scene(
-    struct Framebuffer fb)
+    struct Framebuffer fb, int samples_per_pixel)
 {
     static unsigned const seed = 1234;
 
@@ -83,7 +81,7 @@ static __global__ void trace_scene(
 static unsigned const BLOCK_WIDTH = 8;
 static unsigned const BLOCK_HEIGHT = 8;
 
-void raytrace_scene(struct Framebuffer fb, struct Scene local_scene, point3 look_from, point3 look_at, double vfov)
+void raytrace_scene(struct Framebuffer fb, struct Scene local_scene, int samples, point3 look_from, point3 look_at, double vfov)
 {
     struct Camera local_camera = make_camera(look_from, look_at, make_vec3(0, 1, 0), vfov, fb.width, fb.height);
     checkCudaErrors(cudaMemcpyToSymbol(camera, &local_camera, sizeof(local_camera)));
@@ -93,6 +91,6 @@ void raytrace_scene(struct Framebuffer fb, struct Scene local_scene, point3 look
     dim3 grid = { (fb.width + BLOCK_WIDTH - 1) / BLOCK_WIDTH, (fb.height + BLOCK_HEIGHT - 1) / BLOCK_HEIGHT };
     dim3 block = { BLOCK_WIDTH, BLOCK_HEIGHT };
 
-    trace_scene<<<grid, block>>>(fb);
+    trace_scene<<<grid, block>>>(fb, samples);
     checkCudaErrors(cudaDeviceSynchronize());
 }

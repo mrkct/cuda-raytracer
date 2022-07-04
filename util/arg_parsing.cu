@@ -4,7 +4,7 @@
 
 struct Args parse_args(int argc, char const* argv[])
 {
-    struct Args args = Args { .output_path = "", .image_width = 640, .image_height = 480, .frames = 1 };
+    struct Args args = Args { .output_path = "", .image_width = 640, .image_height = 480, .frames = 1, .samples = 100 };
 
 #define OPT_WITH_ARG(short, long) ((strcmp(argv[i], short) == 0 || strcmp(argv[i], long) == 0) && i + 1 < argc)
 
@@ -17,6 +17,8 @@ struct Args parse_args(int argc, char const* argv[])
             args.image_height = parse_positive_integer_or_exit(argv[++i], "--height");
         } else if (OPT_WITH_ARG("-f", "--frames")) {
             args.frames = parse_positive_integer_or_exit(argv[++i], "--frames");
+        } else if (OPT_WITH_ARG("-s", "--samples")) {
+            args.samples = parse_positive_integer_or_exit(argv[++i], "--samples");
         }
     }
 

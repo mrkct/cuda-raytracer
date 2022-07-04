@@ -37,10 +37,10 @@ int main(int argc, char const* argv[])
     long long total_time_start = current_time_in_milliseconds();
     for (int i = 0; i < args.frames; i++) {
         long long render_time_start = current_time_in_milliseconds();
-        raytrace_scene(fb, scene, PLANETS_CAMERA_FROM, PLANETS_CAMERA_LOOKAT, PLANETS_CAMERA_FOV);
+        raytrace_scene(fb, scene, args.samples, PLANETS_CAMERA_FROM, PLANETS_CAMERA_LOOKAT, PLANETS_CAMERA_FOV);
         long long render_time = current_time_in_milliseconds() - render_time_start;
 
-        printf("Frame %d took\t%lld ms\n", i, render_time);
+        printf("Frame %d took\t%lld us\n", i, render_time);
         combined_render_only_time += render_time;
 
         get_frame_output_path(args.output_path, i, output_path);
@@ -51,8 +51,8 @@ int main(int argc, char const* argv[])
     auto total_time = current_time_in_milliseconds() - total_time_start;
 
     printf("Render finished\n"
-           "\tTotal Time: %lld ms\n"
-           "\tRender-only Time: %lld ms\n",
+           "\tTotal Time: %lld us\n"
+           "\tRender-only Time: %lld us\n",
         total_time, combined_render_only_time);
 
     return 0;
