@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <materials/lambertian.h>
 #include <raytracer.h>
 #include <stdio.h>
@@ -5,7 +6,12 @@
 #include <util/print_utils.h>
 #include <util/rng.h>
 
-static __device__ color ray_color(unsigned id, curandState_t* rng_state, struct Ray ray, struct Scene scene)
+static int const samples_per_pixel = 32;
+
+__constant__ struct Camera camera;
+__constant__ struct Scene scene;
+
+static __device__ color ray_color(unsigned id, curandState_t* rng_state, struct Ray ray)
 {
     struct HitRecord rec;
     struct Ray next_ray = ray;
@@ -32,8 +38,23 @@ static __device__ color ray_color(unsigned id, curandState_t* rng_state, struct 
     return make_color(0, 0, 0);
 }
 
-static __global__ void calculate_ray(
-    struct Framebuffer fb, int samples_per_pixel, struct Scene scene, struct Camera camera)
+static __device__ void calculate_ray(
+    unsigned id,
+    int row,
+    int col,
+    int width, int height,
+    curandState_t* rng_state,
+    color* out_color)
+{
+    double u = ((double)col + rng_next(rng_state)) / (width - 1);
+    double v = ((double)row + rng_next(rng_state)) / (height - 1);
+    struct Ray ray = project_ray_from_camera_to_focal_plane(camera, u, v);
+
+    *out_color = *out_color + ray_color(id, rng_state, ray);
+}
+
+static __global__ void trace_scene(
+    struct Framebuffer fb)
 {
     static unsigned const seed = 1234;
 
@@ -50,16 +71,9 @@ static __global__ void calculate_ray(
     curand_init(seed + id, 0, 0, &rng_state);
 
     color pixel_color = make_color(0, 0, 0);
-    // FIXME: Questo loop si può fare in parallelo
     for (int s = 0; s < samples_per_pixel; ++s) {
-        double u = ((double)col + rng_next(&rng_state)) / (fb.width - 1);
-        double v = ((double)row + rng_next(&rng_state)) / (fb.height - 1);
-        struct Ray ray = project_ray_from_camera_to_focal_plane(camera, u, v);
-
-        pixel_color = pixel_color + ray_color(id, &rng_state, ray, scene);
-        __syncthreads();
+        calculate_ray(id, row, col, fb.width, fb.height, &rng_state, &pixel_color);
     }
-    __syncthreads();
 
     pixel_color = pixel_color / samples_per_pixel;
     pixel_color = gamma2_correct_color(pixel_color);
@@ -69,13 +83,16 @@ static __global__ void calculate_ray(
 static unsigned const BLOCK_WIDTH = 8;
 static unsigned const BLOCK_HEIGHT = 8;
 
-void raytrace_scene(struct Framebuffer fb, struct Scene scene, point3 look_from, point3 look_at, double vfov)
+void raytrace_scene(struct Framebuffer fb, struct Scene local_scene, point3 look_from, point3 look_at, double vfov)
 {
-    struct Camera camera = make_camera(look_from, look_at, make_vec3(0, 1, 0), vfov, fb.width, fb.height);
+    struct Camera local_camera = make_camera(look_from, look_at, make_vec3(0, 1, 0), vfov, fb.width, fb.height);
+    checkCudaErrors(cudaMemcpyToSymbol(camera, &local_camera, sizeof(local_camera)));
+    checkCudaErrors(cudaMemcpyToSymbol(scene, &local_scene, sizeof(local_scene)));
+    checkCudaErrors(cudaDeviceSynchronize());
 
     dim3 grid = { (fb.width + BLOCK_WIDTH - 1) / BLOCK_WIDTH, (fb.height + BLOCK_HEIGHT - 1) / BLOCK_HEIGHT };
     dim3 block = { BLOCK_WIDTH, BLOCK_HEIGHT };
 
-    calculate_ray<<<grid, block>>>(fb, 100, scene, camera);
+    trace_scene<<<grid, block>>>(fb);
     checkCudaErrors(cudaDeviceSynchronize());
 }
