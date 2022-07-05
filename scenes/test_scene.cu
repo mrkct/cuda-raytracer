@@ -40,7 +40,7 @@ static void initialize_textures(void)
     {
         // Ground
         texture_data = make_solid_texture_data(make_color(0.8, 0.8, 0));
-        checkCudaErrors(cudaMemcpyToSymbol(dev_center_texture_data, &texture_data, sizeof(texture_data)));
+        checkCudaErrors(cudaMemcpyToSymbol(dev_ground_texture_data, &texture_data, sizeof(texture_data)));
         checkCudaErrors(cudaDeviceSynchronize());
 
         DECLARE_PTR_TO_SYMBOL(SolidTextureData, ground_texture_data);
@@ -141,7 +141,7 @@ static void initialize_spheres(void)
     struct Sphere s[N_SPHERES];
     s[0] = make_sphere(make_vec3(0, -100.5, 1), 100, ground_material);
     s[1] = make_sphere(make_vec3(0, 0, 1), 0.5, center_material);
-    s[2] = make_sphere(make_vec3(1, 0, 1), 0.5, left_material);
+    s[2] = make_sphere(make_vec3(1, 0, 1), -0.5, left_material);
     s[3] = make_sphere(make_vec3(-1, 0, 1), 0.5, right_material);
     checkCudaErrors(cudaMemcpyToSymbol(dev_spheres, s, sizeof(s)));
     checkCudaErrors(cudaDeviceSynchronize());

@@ -1,3 +1,4 @@
+#include <chrono>
 #include <math.h>
 #include <raytracer.h>
 #include <scenes/planets.h>
@@ -32,16 +33,16 @@ int main(int argc, char const* argv[])
 #define DEG2RAD(d) (d * M_PI / 180.f)
 
     char* output_path = (char*)malloc(sizeof(char) * MAX_PATH_LENGTH);
-    long long combined_render_only_time = 0;
+    long combined_render_only_time = 0;
 
-    auto total_time_start = current_time_in_microseconds();
+    auto total_time_start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < args.frames; i++) {
-        auto render_time_start = current_time_in_microseconds();
+        auto render_time_start = std::chrono::high_resolution_clock::now();
         raytrace_scene(fb, scene, args.samples, TEST_SCENE_CAMERA_FROM, TEST_SCENE_CAMERA_LOOK_AT, TEST_SCENE_CAMERA_FOV);
+        auto render_time_end = std::chrono::high_resolution_clock::now();
+        auto render_time = std::chrono::duration_cast<std::chrono::microseconds>(render_time_end - render_time_start).count();
 
-        auto render_time = current_time_in_microseconds() - render_time_start;
-
-        printf("Frame %d took\t%lld us\n", i, render_time);
+        printf("Frame %d took\t%ld us\n", i, render_time);
         combined_render_only_time += render_time;
 
         get_frame_output_path(args.output_path, i, output_path);
@@ -49,11 +50,12 @@ int main(int argc, char const* argv[])
         write_framebuffer_to_file(fb, output_path);
     }
 
-    auto total_time = current_time_in_microseconds() - total_time_start;
+    auto total_time_end = std::chrono::high_resolution_clock::now();
+    auto total_time = std::chrono::duration_cast<std::chrono::microseconds>(total_time_end - total_time_start).count();
 
     printf("Render finished\n"
-           "\tTotal Time: %lld us\n"
-           "\tRender-only Time: %lld us\n",
+           "\tTotal Time: %ld us\n"
+           "\tRender-only Time: %ld us\n",
         total_time, combined_render_only_time);
 
     return 0;
