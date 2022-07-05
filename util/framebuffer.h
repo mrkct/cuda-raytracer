@@ -2,8 +2,10 @@
 #define FRAMEBUFFER_H
 
 #include <stdint.h>
+#include <util/vec3.h>
 
 struct Framebuffer {
+    color* color_data;
     uint32_t* data;
     unsigned byte_size;
     unsigned width, height;

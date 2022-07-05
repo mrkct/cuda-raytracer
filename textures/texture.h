@@ -14,6 +14,6 @@ struct Texture {
     void* data;
 };
 
-__device__ color texture_color_at(struct Texture*, double u, double v, vec3& point);
+__device__ color texture_color_at(struct Texture*, float u, float v, vec3& point);
 
 #endif

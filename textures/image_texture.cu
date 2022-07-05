@@ -33,7 +33,7 @@ struct Texture make_image_texture(struct ImageTextureData* d)
     return (struct Texture) { .texture_type = IMAGE, .data = d };
 }
 
-__device__ color image_texture_color_at(struct ImageTextureData* d, double u, double v, point3)
+__device__ color image_texture_color_at(struct ImageTextureData* d, float u, float v, point3)
 {
     int x = u * (d->width - 1);
     int y = (d->height - 1) - v * (d->height - 1);

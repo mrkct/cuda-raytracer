@@ -5,10 +5,10 @@
 
 struct MetalData {
     color albedo;
-    double fuzz;
+    float fuzz;
 };
 
-struct MetalData make_metal_material_data(color albedo, double fuzz);
+struct MetalData make_metal_material_data(color albedo, float fuzz);
 struct Material make_metal_material(struct MetalData*);
 __device__ bool metal_scatter(void*, curandState_t*, struct Ray, HitRecord*, color*, struct Ray*);
 

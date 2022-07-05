@@ -1,7 +1,7 @@
 #include <materials/metal.h>
 #include <util/rng.h>
 
-struct MetalData make_metal_material_data(color albedo, double fuzz)
+struct MetalData make_metal_material_data(color albedo, float fuzz)
 {
     return (struct MetalData) { .albedo = albedo, .fuzz = fuzz };
 }

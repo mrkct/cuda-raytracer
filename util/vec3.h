@@ -5,19 +5,19 @@
 #include <math.h>
 #include <stdint.h>
 
-typedef double4 vec3;
+typedef float4 vec3;
 typedef vec3 point3;
 typedef vec3 color;
 
-inline __host__ __device__ vec3 make_vec3(double x, double y, double z) { return make_double4(x, y, z, 0); }
+inline __host__ __device__ vec3 make_vec3(float x, float y, float z) { return make_float4(x, y, z, 0); }
 
-inline __host__ __device__ point3 make_point3(double x, double y, double z) { return make_vec3(x, y, z); }
+inline __host__ __device__ point3 make_point3(float x, float y, float z) { return make_vec3(x, y, z); }
 
-inline __host__ __device__ color make_color(double r, double g, double b) { return make_vec3(r, g, b); }
+inline __host__ __device__ color make_color(float r, float g, float b) { return make_vec3(r, g, b); }
 
-inline __host__ __device__ double vec3_length_squared(vec3 v) { return v.x * v.x + v.y * v.y + v.z * v.z; }
+inline __host__ __device__ float vec3_length_squared(vec3 v) { return v.x * v.x + v.y * v.y + v.z * v.z; }
 
-inline __host__ __device__ double vec3_length(vec3 v) { return sqrt(vec3_length_squared(v)); }
+inline __host__ __device__ float vec3_length(vec3 v) { return sqrt(vec3_length_squared(v)); }
 
 inline __host__ __device__ uint32_t color_to_rgba(color c)
 {
@@ -27,14 +27,14 @@ inline __host__ __device__ uint32_t color_to_rgba(color c)
 
 inline __host__ __device__ color rgba_to_color(uint32_t rgba)
 {
-    return make_color((double)(rgba & 0xff) / 255, (double)((rgba >> 8) & 0xff) / 255, (double)((rgba >> 16) & 0xff) / 255);
+    return make_color((float)(rgba & 0xff) / 255, (float)((rgba >> 8) & 0xff) / 255, (float)((rgba >> 16) & 0xff) / 255);
 }
 
 inline __host__ __device__ color gamma2_correct_color(color c) { return make_vec3(sqrt(c.x), sqrt(c.y), sqrt(c.z)); }
 
 inline __host__ __device__ bool is_near_zero(vec3 v)
 {
-    double const s = 1e-8;
+    float const s = 1e-8;
     return (fabs(v.x) < s) && (fabs(v.y) < s) && (fabs(v.z) < s);
 }
 
@@ -55,13 +55,13 @@ inline __host__ __device__ vec3 operator*(vec3 const& u, vec3 const& v)
     return make_vec3(u.x * v.x, u.y * v.y, u.z * v.z);
 }
 
-inline __host__ __device__ vec3 operator*(double t, vec3 const& v) { return make_vec3(t * v.x, t * v.y, t * v.z); }
+inline __host__ __device__ vec3 operator*(float t, vec3 const& v) { return make_vec3(t * v.x, t * v.y, t * v.z); }
 
-inline __host__ __device__ vec3 operator*(vec3 const& v, double t) { return t * v; }
+inline __host__ __device__ vec3 operator*(vec3 const& v, float t) { return t * v; }
 
-inline __host__ __device__ vec3 operator/(vec3 v, double t) { return (1.0 / t) * v; }
+inline __host__ __device__ vec3 operator/(vec3 v, float t) { return (1.0 / t) * v; }
 
-inline __host__ __device__ double vec3_dot(vec3 const& u, vec3 const& v) { return u.x * v.x + u.y * v.y + u.z * v.z; }
+inline __host__ __device__ float vec3_dot(vec3 const& u, vec3 const& v) { return u.x * v.x + u.y * v.y + u.z * v.z; }
 
 inline __host__ __device__ vec3 vec3_cross(vec3 const& u, vec3 const& v)
 {

@@ -1,10 +1,10 @@
 #include <scenes/scene.h>
 
-__device__ bool ray_scene_hit(struct Scene scene, struct Ray ray, double t_min, double t_max, HitRecord* out_rec)
+__device__ bool ray_scene_hit(struct Scene scene, struct Ray ray, float t_min, float t_max, HitRecord* out_rec)
 {
     HitRecord temp_rec;
     bool hit_anything = false;
-    double closest_so_far = t_max;
+    float closest_so_far = t_max;
 
     for (unsigned i = 0; i < scene.spheres_length; i++) {
         Sphere* object = &scene.spheres[i];

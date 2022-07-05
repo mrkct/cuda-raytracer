@@ -9,6 +9,6 @@ struct Scene {
     unsigned spheres_length;
 };
 
-__device__ bool ray_scene_hit(struct Scene, struct Ray, double t_min, double t_max, HitRecord* out);
+__device__ bool ray_scene_hit(struct Scene, struct Ray, float t_min, float t_max, HitRecord* out);
 
 #endif

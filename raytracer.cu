@@ -28,7 +28,7 @@ static __device__ color ray_color(unsigned id, curandState_t* rng_state, struct 
             next_ray = scattered_ray;
         } else {
             vec3 unit_direction = unit_vector(next_ray.direction);
-            double t = 0.5 * (unit_direction.y + 1.0);
+            float t = 0.5 * (unit_direction.y + 1.0);
             return total_attenuation * ((1.0 - t) * make_color(1.0, 1.0, 1.0) + t * make_color(0.5, 0.7, 1.0));
         }
     }
@@ -36,23 +36,21 @@ static __device__ color ray_color(unsigned id, curandState_t* rng_state, struct 
     return make_color(0, 0, 0);
 }
 
-static __device__ void calculate_ray(
+static __device__ color calculate_ray(
     unsigned id,
     int row,
     int col,
     int width, int height,
-    curandState_t* rng_state,
-    color* out_color)
+    curandState_t* rng_state)
 {
-    double const u = ((double)col + rng_next(rng_state)) / (width - 1);
-    double const v = ((double)row + rng_next(rng_state)) / (height - 1);
+    float const u = ((float)col + rng_next(rng_state)) / (width - 1);
+    float const v = ((float)row + rng_next(rng_state)) / (height - 1);
     const struct Ray ray = project_ray_from_camera_to_focal_plane(camera, u, v);
 
-    *out_color = *out_color + ray_color(id, rng_state, ray);
+    return ray_color(id, rng_state, ray);
 }
 
-static __global__ void trace_scene(
-    struct Framebuffer fb, int samples_per_pixel)
+static __global__ void trace_scene(struct Framebuffer fb)
 {
     static unsigned const seed = 1234;
 
@@ -63,34 +61,62 @@ static __global__ void trace_scene(
         return;
 
     unsigned const id = (fb.height - row - 1) * fb.width + col;
-    uint32_t* pixel = &fb.data[id];
+    color* pixel = &fb.color_data[id];
 
     curandState_t rng_state;
     curand_init(seed + id, 0, 0, &rng_state);
 
     color pixel_color = make_color(0, 0, 0);
-    for (int s = 0; s < samples_per_pixel; ++s) {
-        calculate_ray(id, row, col, fb.width, fb.height, &rng_state, &pixel_color);
+    for (int s = 0; s < 128; s++) {
+        pixel_color = pixel_color + calculate_ray(id, row, col, fb.width, fb.height, &rng_state);
     }
+    *pixel = pixel_color;
+    // atomicAdd(&pixel->x, pixel_color.x);
+    // atomicAdd(&pixel->y, pixel_color.y);
+    // atomicAdd(&pixel->z, pixel_color.z);
+}
+
+static __global__ void convert_from_vec3_to_rgba(struct Framebuffer fb, int samples_per_pixel)
+{
+    int const col = blockIdx.x * blockDim.x + threadIdx.x;
+    int const row = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if (row >= fb.height || col >= fb.width)
+        return;
+
+    unsigned const id = (fb.height - row - 1) * fb.width + col;
+
+    color pixel_color = fb.color_data[id];
 
     pixel_color = pixel_color / samples_per_pixel;
     pixel_color = gamma2_correct_color(pixel_color);
+
+    uint32_t* pixel = &fb.data[id];
     *pixel = color_to_rgba(pixel_color);
 }
 
 static unsigned const BLOCK_WIDTH = 8;
 static unsigned const BLOCK_HEIGHT = 8;
 
-void raytrace_scene(struct Framebuffer fb, struct Scene local_scene, int samples, point3 look_from, point3 look_at, double vfov)
+void raytrace_scene(struct Framebuffer fb, struct Scene local_scene, int samples, point3 look_from, point3 look_at, float vfov)
 {
+    samples = 1;
+
     struct Camera local_camera = make_camera(look_from, look_at, make_vec3(0, 1, 0), vfov, fb.width, fb.height);
     checkCudaErrors(cudaMemcpyToSymbol(camera, &local_camera, sizeof(local_camera)));
     checkCudaErrors(cudaMemcpyToSymbol(scene, &local_scene, sizeof(local_scene)));
     checkCudaErrors(cudaDeviceSynchronize());
 
-    dim3 grid = { (fb.width + BLOCK_WIDTH - 1) / BLOCK_WIDTH, (fb.height + BLOCK_HEIGHT - 1) / BLOCK_HEIGHT };
+    dim3 grid = {
+        (fb.width + BLOCK_WIDTH - 1) / BLOCK_WIDTH,
+        (fb.height + BLOCK_HEIGHT - 1) / BLOCK_HEIGHT,
+        (unsigned)samples
+    };
     dim3 block = { BLOCK_WIDTH, BLOCK_HEIGHT };
 
-    trace_scene<<<grid, block>>>(fb, samples);
+    trace_scene<<<grid, block>>>(fb);
+    checkCudaErrors(cudaDeviceSynchronize());
+    grid.z = 1;
+    convert_from_vec3_to_rgba<<<grid, block>>>(fb, samples);
     checkCudaErrors(cudaDeviceSynchronize());
 }

@@ -7,12 +7,12 @@ struct Camera make_camera(
 {
     struct Camera camera;
 
-    double const aspect_ratio = (double)image_width / image_height;
+    float const aspect_ratio = (float)image_width / image_height;
 
-    double theta = degrees_to_radians(vertical_fov);
-    double h = tan(theta / 2.0f);
-    double viewport_height = 2.0 * h;
-    double viewport_width = aspect_ratio * viewport_height;
+    float theta = degrees_to_radians(vertical_fov);
+    float h = tan(theta / 2.0f);
+    float viewport_height = 2.0 * h;
+    float viewport_width = aspect_ratio * viewport_height;
 
     vec3 w = unit_vector(look_from - look_at);
     vec3 u = unit_vector(vec3_cross(view_up, w));
@@ -26,7 +26,7 @@ struct Camera make_camera(
     return camera;
 }
 
-__device__ struct Ray project_ray_from_camera_to_focal_plane(struct Camera camera, double u, double v)
+__device__ struct Ray project_ray_from_camera_to_focal_plane(struct Camera camera, float u, float v)
 {
     return (struct Ray) { .origin = camera.origin,
         .direction = camera.lower_left_corner + u * camera.horizontal + v * camera.vertical - camera.origin };

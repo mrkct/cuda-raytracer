@@ -8,15 +8,15 @@
 
 struct Sphere {
     point3 origin;
-    double radius;
+    float radius;
     struct Material* material;
 };
 
-inline struct Sphere make_sphere(point3 origin, double radius, struct Material* material)
+inline struct Sphere make_sphere(point3 origin, float radius, struct Material* material)
 {
     return (struct Sphere) { .origin = origin, .radius = radius, .material = material };
 }
 
-__device__ bool ray_sphere_hit(struct Sphere, struct Ray, double t_min, double t_max, HitRecord* out);
+__device__ bool ray_sphere_hit(struct Sphere, struct Ray, float t_min, float t_max, HitRecord* out);
 
 #endif

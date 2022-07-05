@@ -10,7 +10,7 @@ struct Texture make_solid_texture(struct SolidTextureData* d)
     return (struct Texture) { .texture_type = SOLID_COLOR, .data = d };
 }
 
-__device__ color solid_texture_color_at(struct SolidTextureData* d, double, double, point3)
+__device__ color solid_texture_color_at(struct SolidTextureData* d, float, float, point3)
 {
     return d->c;
 }

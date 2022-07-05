@@ -12,6 +12,9 @@ struct Framebuffer alloc_framebuffer(unsigned width, unsigned height)
     checkCudaErrors(cudaMallocManaged(&fb.data, fb.byte_size));
     checkCudaErrors(cudaGetLastError());
 
+    checkCudaErrors(cudaMalloc(&fb.color_data, sizeof(color) * width * height));
+    checkCudaErrors(cudaMemset(fb.color_data, 0, sizeof(color) * width * height));
+
     return fb;
 }
 

@@ -14,6 +14,6 @@ struct Camera {
 struct Camera make_camera(
     point3 look_from, point3 look_at, vec3 view_up, float vertical_fov, size_t image_width, size_t image_height);
 
-__device__ struct Ray project_ray_from_camera_to_focal_plane(struct Camera, double u, double v);
+__device__ struct Ray project_ray_from_camera_to_focal_plane(struct Camera, float u, float v);
 
 #endif
