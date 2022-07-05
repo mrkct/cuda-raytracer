@@ -34,12 +34,12 @@ int main(int argc, char const* argv[])
     char* output_path = (char*)malloc(sizeof(char) * MAX_PATH_LENGTH);
     long long combined_render_only_time = 0;
 
-    long long total_time_start = current_time_in_milliseconds();
+    auto total_time_start = current_time_in_microseconds();
     for (int i = 0; i < args.frames; i++) {
-        long long render_time_start = current_time_in_milliseconds();
+        auto render_time_start = current_time_in_microseconds();
         raytrace_scene(fb, scene, args.samples, TEST_SCENE_CAMERA_FROM, TEST_SCENE_CAMERA_LOOK_AT, TEST_SCENE_CAMERA_FOV);
 
-        long long render_time = current_time_in_milliseconds() - render_time_start;
+        auto render_time = current_time_in_microseconds() - render_time_start;
 
         printf("Frame %d took\t%lld us\n", i, render_time);
         combined_render_only_time += render_time;
@@ -49,7 +49,7 @@ int main(int argc, char const* argv[])
         write_framebuffer_to_file(fb, output_path);
     }
 
-    auto total_time = current_time_in_milliseconds() - total_time_start;
+    auto total_time = current_time_in_microseconds() - total_time_start;
 
     printf("Render finished\n"
            "\tTotal Time: %lld us\n"
