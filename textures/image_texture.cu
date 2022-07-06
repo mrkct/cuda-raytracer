@@ -33,9 +33,9 @@ struct Texture make_image_texture(struct ImageTextureData* d)
     return (struct Texture) { .texture_type = IMAGE, .data = d };
 }
 
-__device__ color image_texture_color_at(struct ImageTextureData* d, float u, float v, point3)
+__device__ color image_texture_color_at(struct ImageTextureData* d, float const u, float const v, point3 const&)
 {
-    int x = u * (d->width - 1);
-    int y = (d->height - 1) - v * (d->height - 1);
+    int const x = u * (d->width - 1);
+    int const y = (d->height - 1) - v * (d->height - 1);
     return rgba_to_color(d->data[y * d->width + x]);
 }

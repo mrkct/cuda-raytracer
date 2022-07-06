@@ -3,7 +3,7 @@
 #include <math.h>
 #include <stdio.h>
 
-__device__ bool ray_sphere_hit(struct Sphere sphere, struct Ray ray, float t_min, float t_max, HitRecord* out_rec)
+__device__ bool ray_sphere_hit(struct Sphere const& sphere, struct Ray const& ray, float const t_min, float const t_max, HitRecord* out_rec)
 {
     const vec3 oc = ray.origin - sphere.origin;
     float const a = vec3_length_squared(ray.direction);

@@ -10,6 +10,6 @@ struct MetalData {
 
 struct MetalData make_metal_material_data(color albedo, float fuzz);
 struct Material make_metal_material(struct MetalData*);
-__device__ bool metal_scatter(void*, curandState_t*, struct Ray, HitRecord*, color*, struct Ray*);
+__device__ bool metal_scatter(void*, curandState_t*, struct Ray const&, HitRecord*, color*, struct Ray*);
 
 #endif

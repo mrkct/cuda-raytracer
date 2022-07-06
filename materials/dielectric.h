@@ -9,6 +9,6 @@ struct DielectricData {
 
 struct DielectricData make_dielectric_material_data(float refraction_level);
 struct Material make_dielectric_material(struct DielectricData*);
-__device__ bool dielectric_scatter(void*, curandState_t*, struct Ray, HitRecord*, color*, struct Ray*);
+__device__ bool dielectric_scatter(void*, curandState_t*, struct Ray const&, HitRecord*, color*, struct Ray*);
 
 #endif

@@ -10,6 +10,6 @@ struct CheckeredTextureData {
 
 struct CheckeredTextureData make_checkered_texture_data(float size, color c1, color c2);
 struct Texture make_checkered_texture(struct CheckeredTextureData* d);
-__device__ color checkered_texture_color_at(struct CheckeredTextureData* d, float, float, point3);
+__device__ color checkered_texture_color_at(struct CheckeredTextureData* d, float const, float const, point3 const&);
 
 #endif

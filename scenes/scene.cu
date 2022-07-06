@@ -1,6 +1,6 @@
 #include <scenes/scene.h>
 
-__device__ bool ray_scene_hit(struct Scene scene, struct Ray ray, float t_min, float t_max, HitRecord* out_rec)
+__device__ bool ray_scene_hit(struct Scene const& scene, struct Ray const& ray, float const t_min, float const t_max, HitRecord* out_rec)
 {
     HitRecord temp_rec;
     bool hit_anything = false;

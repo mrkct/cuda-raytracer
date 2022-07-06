@@ -8,8 +8,9 @@
 
 __constant__ struct Camera camera;
 __constant__ struct Scene scene;
+__constant__ struct Framebuffer fb;
 
-static __device__ color ray_color(unsigned id, curandState_t* rng_state, struct Ray ray)
+static __device__ color ray_color(unsigned id, curandState_t* rng_state, struct Ray const& ray)
 {
     struct HitRecord rec;
     struct Ray next_ray = ray;
@@ -28,7 +29,7 @@ static __device__ color ray_color(unsigned id, curandState_t* rng_state, struct 
             next_ray = scattered_ray;
         } else {
             vec3 unit_direction = unit_vector(next_ray.direction);
-            float t = 0.5 * (unit_direction.y + 1.0);
+            float const t = 0.5 * (unit_direction.y + 1.0);
             return total_attenuation * ((1.0 - t) * make_color(1.0, 1.0, 1.0) + t * make_color(0.5, 0.7, 1.0));
         }
     }
@@ -37,20 +38,19 @@ static __device__ color ray_color(unsigned id, curandState_t* rng_state, struct 
 }
 
 static __device__ color calculate_ray(
-    unsigned id,
-    int row,
-    int col,
-    int width, int height,
+    unsigned const id,
+    int const row,
+    int const col,
     curandState_t* rng_state)
 {
-    float const u = ((float)col + rng_next(rng_state)) / (width - 1);
-    float const v = ((float)row + rng_next(rng_state)) / (height - 1);
+    float const u = ((float)col + rng_next(rng_state)) / (fb.width - 1);
+    float const v = ((float)row + rng_next(rng_state)) / (fb.height - 1);
     const struct Ray ray = project_ray_from_camera_to_focal_plane(camera, u, v);
 
     return ray_color(id, rng_state, ray);
 }
 
-static __global__ void trace_scene(struct Framebuffer fb)
+static __global__ void trace_scene()
 {
     static unsigned const seed = 1234;
 
@@ -66,7 +66,7 @@ static __global__ void trace_scene(struct Framebuffer fb)
     curandState_t rng_state;
     curand_init(seed + id * blockIdx.z, 0, 0, &rng_state);
 
-    color pixel_color = calculate_ray(id, row, col, fb.width, fb.height, &rng_state);
+    color pixel_color = calculate_ray(id, row, col, &rng_state);
 
     atomicAdd(&pixel->x, pixel_color.x);
     atomicAdd(&pixel->y, pixel_color.y);
@@ -95,23 +95,24 @@ static __global__ void convert_from_vec3_to_rgba(struct Framebuffer fb, int samp
 static unsigned const BLOCK_WIDTH = 8;
 static unsigned const BLOCK_HEIGHT = 8;
 
-void raytrace_scene(struct Framebuffer fb, struct Scene local_scene, int samples, point3 look_from, point3 look_at, float vfov)
+void raytrace_scene(struct Framebuffer framebuffer, struct Scene local_scene, int samples, point3 look_from, point3 look_at, float vfov)
 {
-    struct Camera local_camera = make_camera(look_from, look_at, make_vec3(0, 1, 0), vfov, fb.width, fb.height);
+    struct Camera local_camera = make_camera(look_from, look_at, make_vec3(0, 1, 0), vfov, framebuffer.width, framebuffer.height);
     checkCudaErrors(cudaMemcpyToSymbol(camera, &local_camera, sizeof(local_camera)));
     checkCudaErrors(cudaMemcpyToSymbol(scene, &local_scene, sizeof(local_scene)));
+    checkCudaErrors(cudaMemcpyToSymbol(fb, &framebuffer, sizeof(framebuffer)));
     checkCudaErrors(cudaDeviceSynchronize());
 
     dim3 grid = {
-        (fb.width + BLOCK_WIDTH - 1) / BLOCK_WIDTH,
-        (fb.height + BLOCK_HEIGHT - 1) / BLOCK_HEIGHT,
+        (framebuffer.width + BLOCK_WIDTH - 1) / BLOCK_WIDTH,
+        (framebuffer.height + BLOCK_HEIGHT - 1) / BLOCK_HEIGHT,
         (unsigned)samples
     };
     dim3 block = { BLOCK_WIDTH, BLOCK_HEIGHT };
 
-    trace_scene<<<grid, block>>>(fb);
+    trace_scene<<<grid, block>>>();
     checkCudaErrors(cudaDeviceSynchronize());
     grid.z = 1;
-    convert_from_vec3_to_rgba<<<grid, block>>>(fb, samples);
+    convert_from_vec3_to_rgba<<<grid, block>>>(framebuffer, samples);
     checkCudaErrors(cudaDeviceSynchronize());
 }

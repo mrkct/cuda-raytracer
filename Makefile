@@ -3,7 +3,6 @@ NVCC = nvcc
 NVCCFLAGS = \
 	-lineinfo -arch=sm_37 -I. \
 	--compiler-options -Wall --compiler-options -Wextra \
-	--maxrregcount 64 -Xptxas -v \
 	-Wno-deprecated-gpu-targets \
 
 OBJS = \

@@ -14,8 +14,8 @@ struct Texture make_checkered_texture(struct CheckeredTextureData* d)
     return (struct Texture) { .texture_type = CHECKERED, .data = d };
 }
 
-__device__ color checkered_texture_color_at(struct CheckeredTextureData* d, float u, float v, point3 p)
+__device__ color checkered_texture_color_at(struct CheckeredTextureData* d, float const u, float const v, point3 const& p)
 {
-    int x = (int)(u / d->size) + (int)(v / d->size);
+    int const x = (int)(u / d->size) + (int)(v / d->size);
     return x % 2 == 0 ? d->c1 : d->c2;
 }

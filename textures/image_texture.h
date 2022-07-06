@@ -12,6 +12,6 @@ struct ImageTextureData {
 struct ImageTextureData make_image_texture_data_from_file(char const*);
 struct ImageTextureData make_image_texture_data(uint32_t*, unsigned, unsigned);
 struct Texture make_image_texture(struct ImageTextureData* d);
-__device__ color image_texture_color_at(struct ImageTextureData* d, float, float, point3);
+__device__ color image_texture_color_at(struct ImageTextureData* d, float const, float const, point3 const&);
 
 #endif

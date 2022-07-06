@@ -13,7 +13,7 @@ struct Material make_lambertian_material(LambertianData* data)
     return (struct Material) { .material_type = LAMBERTIAN, .data = data };
 }
 
-__device__ bool lambertian_scatter(void* vdata, curandState_t* rng_state, struct Ray ray, HitRecord* rec,
+__device__ bool lambertian_scatter(void* vdata, curandState_t* rng_state, struct Ray const& ray, HitRecord* rec,
     color* out_attenuation, struct Ray* out_scattered)
 {
     struct LambertianData* data = (struct LambertianData*)vdata;

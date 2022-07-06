@@ -11,7 +11,7 @@ struct Material make_metal_material(MetalData* data)
     return (struct Material) { .material_type = METAL, .data = data };
 }
 
-__device__ bool metal_scatter(void* vdata, curandState_t* rng_state, struct Ray ray, HitRecord* rec,
+__device__ bool metal_scatter(void* vdata, curandState_t* rng_state, struct Ray const& ray, HitRecord* rec,
     color* out_attenuation, struct Ray* out_scattered)
 {
     MetalData* data = (MetalData*)vdata;

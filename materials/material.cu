@@ -4,7 +4,7 @@
 #include <materials/metal.h>
 #include <stdio.h>
 
-__device__ bool material_scatter(struct Material const* material, curandState_t* rng_state, struct Ray ray,
+__device__ bool material_scatter(struct Material const* material, curandState_t* rng_state, struct Ray const& ray,
     HitRecord* rec, color* out_attenuation, struct Ray* out_scattered)
 {
     switch (material->material_type) {
