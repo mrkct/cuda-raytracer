@@ -64,16 +64,13 @@ static __global__ void trace_scene(struct Framebuffer fb)
     color* pixel = &fb.color_data[id];
 
     curandState_t rng_state;
-    curand_init(seed + id, 0, 0, &rng_state);
+    curand_init(seed + id * blockIdx.z, 0, 0, &rng_state);
 
-    color pixel_color = make_color(0, 0, 0);
-    for (int s = 0; s < 128; s++) {
-        pixel_color = pixel_color + calculate_ray(id, row, col, fb.width, fb.height, &rng_state);
-    }
-    *pixel = pixel_color;
-    // atomicAdd(&pixel->x, pixel_color.x);
-    // atomicAdd(&pixel->y, pixel_color.y);
-    // atomicAdd(&pixel->z, pixel_color.z);
+    color pixel_color = calculate_ray(id, row, col, fb.width, fb.height, &rng_state);
+
+    atomicAdd(&pixel->x, pixel_color.x);
+    atomicAdd(&pixel->y, pixel_color.y);
+    atomicAdd(&pixel->z, pixel_color.z);
 }
 
 static __global__ void convert_from_vec3_to_rgba(struct Framebuffer fb, int samples_per_pixel)
@@ -100,8 +97,6 @@ static unsigned const BLOCK_HEIGHT = 8;
 
 void raytrace_scene(struct Framebuffer fb, struct Scene local_scene, int samples, point3 look_from, point3 look_at, float vfov)
 {
-    samples = 1;
-
     struct Camera local_camera = make_camera(look_from, look_at, make_vec3(0, 1, 0), vfov, fb.width, fb.height);
     checkCudaErrors(cudaMemcpyToSymbol(camera, &local_camera, sizeof(local_camera)));
     checkCudaErrors(cudaMemcpyToSymbol(scene, &local_scene, sizeof(local_scene)));
