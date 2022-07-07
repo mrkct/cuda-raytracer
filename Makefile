@@ -1,7 +1,7 @@
 NAME = rt
 NVCC = nvcc
 NVCCFLAGS = \
-	-lineinfo -arch=sm_37 -I. \
+	-lineinfo -gencode arch=compute_75,code=sm_75 -I. \
 	--compiler-options -Wall --compiler-options -Wextra \
 	-Wno-deprecated-gpu-targets \
 
