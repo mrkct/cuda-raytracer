@@ -28,7 +28,7 @@ static __device__ color ray_color(unsigned id, curandState_t* rng_state, struct 
             total_attenuation = total_attenuation * attenuation;
             next_ray = scattered_ray;
         } else {
-            vec3 unit_direction = unit_vector(next_ray.direction);
+            vec3 const unit_direction = unit_vector(next_ray.direction);
             float const t = 0.5 * (unit_direction.y + 1.0);
             return total_attenuation * ((1.0 - t) * make_color(1.0, 1.0, 1.0) + t * make_color(0.5, 0.7, 1.0));
         }
@@ -68,6 +68,7 @@ static __global__ void trace_scene()
 
     color pixel_color = calculate_ray(id, row, col, &rng_state);
 
+    __syncthreads();
     atomicAdd(&pixel->x, pixel_color.x);
     atomicAdd(&pixel->y, pixel_color.y);
     atomicAdd(&pixel->z, pixel_color.z);
