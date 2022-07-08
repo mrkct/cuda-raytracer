@@ -64,7 +64,7 @@ nostra fotocamera (e dunque utili ai fini del generare l'immagine).
 
 Nonostante questa ottimizzazione il raytracing rimane comunque difficile da
 implementare in contesti di grafica real-time a causa del grande numero di
-raggi da simulare, rimane però molto popolare nel rendering offline ed è un
+raggi da simulare, è però molto popolare nel rendering offline; inoltre è un
 problema che si presta molto bene alla parallelizzazione dato che il calcolo
 per ognuno dei raggi da simulare è completamente indipendente dagli altri.
 
@@ -113,24 +113,24 @@ Idealmente il rapporto $\frac{ViewWidth}{ViewHeight}$ è uguale a quello di
 $\frac{ImageWidth}{ImageHeight}$, altrimenti l'immagine finale verrà
 schiacciata o allungata.
 
-La dimensione e posizione del piano rispetto alla telecamera ha effetti
-interessanti sull'immagine finale.
-In pratica questo piano è descritto tramite due variabili: la
+\bigbreak
+
+La dimensione e posizione del piano rispetto alla telecamera influenzano
+quanti raggi catturati dal pinhole finiranno poi nella immagine finale.
+Il piano focale può essere descritto tramite due variabili: la
 \textit{lunghezza focale}(o \textit{focal length}) e
 l'\textit{angolo di visione}(o \textit{field of view}, \textit{FoV}).
-La lunghezza focale è la distanza tra telecamera e piano; tenendo fissa la
-dimensione del piano ma allontanandolo dallo spettatore provoca un
-avvicinamento sempre maggiore dei raggi proiettati sul piano che finiscono
-per concentrarsi un'area più piccola ma in modo più denso:
-questo ha un effetto zoom sull'immagine finale.
+La lunghezza focale è la distanza tra telecamera e piano
+mentre l'angolo di visione, che può essere orizzontale o verticale (è una
+preferenza), implica quanta luce entra nel pinhole.
+Un piano molto grande e vicino al pinhole implica che molti più raggi finiscono
+per intersecare il piano e dunque una porzione di scena maggiore è visibile,
+al contrario un piano molto piccolo alla stessa distanza catturerà raggi in
+una area molto più piccola, il risultato è un effetto zoom.
 
-\begin{figure}[h]
-% Immagini del cambio di focal length
-\end{figure}
-
-L'angolo di visione, che può essere orizzontale o verticale (è una preferenza),
-implica quanta luce entra nel pinhole.
-Più luce entra più grande è la porzione di scena che possiamo vedere. 
+Il variare della lunghezza focale può avere anche degli effetti sulla messa
+a fuoco dell'immagine quando si ha una lente curva in una fotocamera, in questo
+raytracer però non simuliamo una lente dunque non ci interessa.
 
 \begin{figure}[h]
   \centering
@@ -139,15 +139,15 @@ Più luce entra più grande è la porzione di scena che possiamo vedere.
 
 Questi due parametri descrivono il piano sulla quale viene proiettata
 l'immagine:
-assumendo un $FoV$ verticale allora l'altezza del piano sarà data da
-$ViewHeight = tan(\frac{Fov}{2})$ mentre la larghezza sarà
-$ViewWidth = ViewHeight \cdot AspectRatio$ dove
+assumendo un $FoV$ verticale ed una distanza focale di $1$ allora l'altezza
+del piano sarà data da $ViewHeight = tan(\frac{Fov}{2})$ mentre la larghezza
+sarà $ViewWidth = ViewHeight \cdot AspectRatio$ dove
 $AspectRatio = \frac{ImageWidth}{ImageHeight}$.
 Il centro del piano si troverà dunque alle coordinate
-$(0, 0, FocalLength)$ e l'angolo in basso a sinistra sarà:
+$(0, 0, 1)$ e l'angolo in basso a sinistra sarà:
 
 $$
-  LowerLeftCorner = (0, 0, FocalLength) - \frac{ViewWidth}{2} - \frac{ViewHeight}{2}
+  LowerLeftCorner = (0, 0, 1) - \frac{ViewWidth}{2} - \frac{ViewHeight}{2}
 $$
 
 Un raytracer, per ogni pixel dell'immagine, proietta uno o più raggi, con
@@ -163,6 +163,8 @@ alcuni aspetti importanti come un modo per trovare l'intersezione tra raggio
 e oggetti e la \textit{funzione di trasporto del colore} dei materiali: il
 motivo è semplicemente che questi aspetti dipendono dalla scena che vogliamo
 renderizzare.
+
+\newpage
 
 \begin{lstlisting}[mathescape=true]
     for (int x = 0; x < ImageWidth; x++) {
@@ -234,7 +236,7 @@ distanza minore dalla telecamera.
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.5\linewidth,keepaspectratio]{images/SphereRayIntersection.pdf}
+  \includegraphics[width=0.3\linewidth,keepaspectratio]{images/SphereRayIntersection.pdf}
 \end{figure}
 
 \subsection{Calcolo della funzione di trasporto del colore di un materiale opaco}
@@ -260,7 +262,7 @@ raggio precedente e il vettore normale della superficie.
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.5\linewidth,keepaspectratio]{images/LambertianRayReflection.pdf}
+  \includegraphics[width=0.3\linewidth,keepaspectratio]{images/LambertianRayReflection.pdf}
 \end{figure}
 
 Per esempio, se determiniamo che il nostro raggio colpisce una sfera nella
@@ -422,7 +424,7 @@ $30\%$ delle volte che i warp si trovano in stallo il motivo è il passo finale
 di scrittura del colore del raggio sul framebuffer e il $75\%$ degli
 accessi in memoria non coalescenti sono ancora dati da quest'ultimo passo.
 
-Questa perdita di performance è causata dalla somma del colore del raggii
+Questa perdita di performance è causata dalla somma del colore del raggi
 calcolati con i raggi precedentemente scritti sul framebuffer per calcolarne
 la media; questa somma deve dunque essere fatta in modo atomico.
 Una possibile soluzione al problema esplorata è quella di effettuare la
@@ -438,6 +440,7 @@ memoria contemporaneamente: in questa implementazione ogni thread, dedicato ad
 un singolo pixel, lanciava sequenzialmente blocchi di 32 thread che calcolavano
 un singolo raggio e lo scrivevano sul proprio framebuffer.
 Infine tramite una riduzione parallela questi raggi venivano sommati.
+
 Sfortunatamente l'overhead del parallelismo dinamico finiva per compromettere
 le performance, rendendo questa soluzione peggiore di quella banale con le
 somme atomiche.
