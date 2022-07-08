@@ -28,7 +28,7 @@ int main(int argc, char const* argv[])
         args.image_width, args.image_height, args.frames, args.output_path);
 
     struct Framebuffer fb = alloc_framebuffer(args.image_width, args.image_height);
-    struct Scene scene = create_test_scene();
+    struct Scene scene = create_planets_scene();
 
 #define DEG2RAD(d) (d * M_PI / 180.f)
 
@@ -38,7 +38,7 @@ int main(int argc, char const* argv[])
     auto total_time_start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < args.frames; i++) {
         auto render_time_start = std::chrono::high_resolution_clock::now();
-        raytrace_scene(fb, scene, args.samples, TEST_SCENE_CAMERA_FROM, TEST_SCENE_CAMERA_LOOK_AT, TEST_SCENE_CAMERA_FOV);
+        raytrace_scene(fb, scene, args.samples, PLANETS_CAMERA_FROM, PLANETS_CAMERA_LOOKAT, PLANETS_CAMERA_FOV);
         auto render_time_end = std::chrono::high_resolution_clock::now();
         auto render_time = std::chrono::duration_cast<std::chrono::microseconds>(render_time_end - render_time_start).count();
 
