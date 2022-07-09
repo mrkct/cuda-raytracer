@@ -7,6 +7,7 @@ Una relazione di introduzione al raytracing ed al problema di parallelizzarlo
 tramite CUDA è disponibile nel file [relazione.pdf](relazione.pdf)
 
 ![Render di Esempio](report/images/renders/planets.png)
+![Render di Esempio](report/images/renders/floating_spheres.png)
 
 ## Come compilare ed eseguire
 Per compilare ed eseguire il raytracer, assumendo che il toolkit CUDA sia
