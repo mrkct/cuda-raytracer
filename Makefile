@@ -14,6 +14,7 @@ OBJS = \
 	materials/lambertian.o \
 	materials/material.o \
 	materials/metal.o \
+	scenes/floating_spheres.o \
 	scenes/scene.o \
 	scenes/single_sphere.o \
 	scenes/planets.o \

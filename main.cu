@@ -1,6 +1,7 @@
 #include <chrono>
 #include <math.h>
 #include <raytracer.h>
+#include <scenes/floating_spheres.h>
 #include <scenes/planets.h>
 #include <scenes/single_sphere.h>
 #include <scenes/test_scene.h>
@@ -28,7 +29,7 @@ int main(int argc, char const* argv[])
         args.image_width, args.image_height, args.frames, args.output_path);
 
     struct Framebuffer fb = alloc_framebuffer(args.image_width, args.image_height);
-    struct Scene scene = create_planets_scene();
+    struct Scene scene = create_floating_spheres_scene();
 
 #define DEG2RAD(d) (d * M_PI / 180.f)
 
@@ -38,7 +39,7 @@ int main(int argc, char const* argv[])
     auto total_time_start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < args.frames; i++) {
         auto render_time_start = std::chrono::high_resolution_clock::now();
-        raytrace_scene(fb, scene, args.samples, PLANETS_CAMERA_FROM, PLANETS_CAMERA_LOOKAT, PLANETS_CAMERA_FOV);
+        raytrace_scene(fb, scene, args.samples, FLOATING_SPHERES_CAMERA_FROM, FLOATING_SPHERES_CAMERA_LOOKAT, FLOATING_SPHERES_CAMERA_FOV);
         auto render_time_end = std::chrono::high_resolution_clock::now();
         auto render_time = std::chrono::duration_cast<std::chrono::microseconds>(render_time_end - render_time_start).count();
 
